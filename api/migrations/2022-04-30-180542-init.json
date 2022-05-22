@@ -1,0 +1,666 @@
+{
+	"formatVersion": 3,
+	"modifications": [
+		{
+			"modification": "createEntity",
+			"entity": {
+				"name": "Schedule",
+				"primary": "id",
+				"primaryColumn": "id",
+				"unique": {},
+				"fields": {
+					"id": {
+						"name": "id",
+						"columnName": "id",
+						"nullable": false,
+						"type": "Uuid",
+						"columnType": "uuid"
+					}
+				},
+				"tableName": "schedule"
+			}
+		},
+		{
+			"modification": "createEntity",
+			"entity": {
+				"name": "ProgrammeGroup",
+				"primary": "id",
+				"primaryColumn": "id",
+				"unique": {},
+				"fields": {
+					"id": {
+						"name": "id",
+						"columnName": "id",
+						"nullable": false,
+						"type": "Uuid",
+						"columnType": "uuid"
+					}
+				},
+				"tableName": "programme_group"
+			}
+		},
+		{
+			"modification": "createEntity",
+			"entity": {
+				"name": "AtendeesGroup",
+				"primary": "id",
+				"primaryColumn": "id",
+				"unique": {},
+				"fields": {
+					"id": {
+						"name": "id",
+						"columnName": "id",
+						"nullable": false,
+						"type": "Uuid",
+						"columnType": "uuid"
+					}
+				},
+				"tableName": "atendees_group"
+			}
+		},
+		{
+			"modification": "createEntity",
+			"entity": {
+				"name": "Person",
+				"primary": "id",
+				"primaryColumn": "id",
+				"unique": {},
+				"fields": {
+					"id": {
+						"name": "id",
+						"columnName": "id",
+						"nullable": false,
+						"type": "Uuid",
+						"columnType": "uuid"
+					}
+				},
+				"tableName": "person"
+			}
+		},
+		{
+			"modification": "createEntity",
+			"entity": {
+				"name": "TrayItem",
+				"primary": "id",
+				"primaryColumn": "id",
+				"unique": {},
+				"fields": {
+					"id": {
+						"name": "id",
+						"columnName": "id",
+						"nullable": false,
+						"type": "Uuid",
+						"columnType": "uuid"
+					}
+				},
+				"tableName": "tray_item"
+			}
+		},
+		{
+			"modification": "createEntity",
+			"entity": {
+				"name": "Plannable",
+				"primary": "id",
+				"primaryColumn": "id",
+				"unique": {},
+				"fields": {
+					"id": {
+						"name": "id",
+						"columnName": "id",
+						"nullable": false,
+						"type": "Uuid",
+						"columnType": "uuid"
+					}
+				},
+				"tableName": "plannable"
+			}
+		},
+		{
+			"modification": "createEntity",
+			"entity": {
+				"name": "ScheduledItem",
+				"primary": "id",
+				"primaryColumn": "id",
+				"unique": {},
+				"fields": {
+					"id": {
+						"name": "id",
+						"columnName": "id",
+						"nullable": false,
+						"type": "Uuid",
+						"columnType": "uuid"
+					}
+				},
+				"tableName": "scheduled_item"
+			}
+		},
+		{
+			"modification": "createColumn",
+			"entityName": "Schedule",
+			"field": {
+				"name": "name",
+				"columnName": "name",
+				"nullable": false,
+				"type": "String",
+				"columnType": "text"
+			}
+		},
+		{
+			"modification": "createColumn",
+			"entityName": "Schedule",
+			"field": {
+				"name": "startDate",
+				"columnName": "start_date",
+				"nullable": false,
+				"type": "Date",
+				"columnType": "date"
+			}
+		},
+		{
+			"modification": "createColumn",
+			"entityName": "ProgrammeGroup",
+			"field": {
+				"name": "name",
+				"columnName": "name",
+				"nullable": false,
+				"type": "String",
+				"columnType": "text"
+			}
+		},
+		{
+			"modification": "createColumn",
+			"entityName": "ProgrammeGroup",
+			"field": {
+				"name": "color",
+				"columnName": "color",
+				"nullable": false,
+				"type": "String",
+				"columnType": "text"
+			}
+		},
+		{
+			"modification": "createColumn",
+			"entityName": "AtendeesGroup",
+			"field": {
+				"name": "name",
+				"columnName": "name",
+				"nullable": true,
+				"type": "String",
+				"columnType": "text"
+			}
+		},
+		{
+			"modification": "createColumn",
+			"entityName": "AtendeesGroup",
+			"field": {
+				"name": "regular",
+				"columnName": "regular",
+				"nullable": false,
+				"default": true,
+				"type": "Bool",
+				"columnType": "boolean"
+			},
+			"fillValue": true
+		},
+		{
+			"modification": "createColumn",
+			"entityName": "Person",
+			"field": {
+				"name": "name",
+				"columnName": "name",
+				"nullable": false,
+				"type": "String",
+				"columnType": "text"
+			}
+		},
+		{
+			"modification": "createColumn",
+			"entityName": "TrayItem",
+			"field": {
+				"name": "title",
+				"columnName": "title",
+				"nullable": false,
+				"type": "String",
+				"columnType": "text"
+			}
+		},
+		{
+			"modification": "createColumn",
+			"entityName": "TrayItem",
+			"field": {
+				"name": "description",
+				"columnName": "description",
+				"nullable": false,
+				"default": "",
+				"type": "String",
+				"columnType": "text"
+			},
+			"fillValue": ""
+		},
+		{
+			"modification": "createColumn",
+			"entityName": "TrayItem",
+			"field": {
+				"name": "duration",
+				"columnName": "duration",
+				"nullable": false,
+				"type": "Integer",
+				"columnType": "integer"
+			}
+		},
+		{
+			"modification": "createColumn",
+			"entityName": "TrayItem",
+			"field": {
+				"name": "note",
+				"columnName": "note",
+				"nullable": false,
+				"default": "",
+				"type": "String",
+				"columnType": "text"
+			},
+			"fillValue": ""
+		},
+		{
+			"modification": "createColumn",
+			"entityName": "ScheduledItem",
+			"field": {
+				"name": "start",
+				"columnName": "start",
+				"nullable": false,
+				"type": "DateTime",
+				"columnType": "timestamptz"
+			}
+		},
+		{
+			"modification": "createRelation",
+			"entityName": "ProgrammeGroup",
+			"owningSide": {
+				"name": "schedule",
+				"nullable": false,
+				"type": "ManyHasOne",
+				"target": "Schedule",
+				"joiningColumn": {
+					"columnName": "schedule_id",
+					"onDelete": "restrict"
+				},
+				"inversedBy": "programmeGroups"
+			},
+			"inverseSide": {
+				"name": "programmeGroups",
+				"ownedBy": "schedule",
+				"type": "OneHasMany",
+				"target": "ProgrammeGroup"
+			}
+		},
+		{
+			"modification": "createRelation",
+			"entityName": "AtendeesGroup",
+			"owningSide": {
+				"name": "schedule",
+				"nullable": false,
+				"type": "ManyHasOne",
+				"target": "Schedule",
+				"joiningColumn": {
+					"columnName": "schedule_id",
+					"onDelete": "restrict"
+				},
+				"inversedBy": "atendeesGroups"
+			},
+			"inverseSide": {
+				"name": "atendeesGroups",
+				"ownedBy": "schedule",
+				"type": "OneHasMany",
+				"target": "AtendeesGroup"
+			}
+		},
+		{
+			"modification": "createRelation",
+			"entityName": "Person",
+			"owningSide": {
+				"name": "schedule",
+				"nullable": false,
+				"type": "ManyHasOne",
+				"target": "Schedule",
+				"joiningColumn": {
+					"columnName": "schedule_id",
+					"onDelete": "restrict"
+				},
+				"inversedBy": "people"
+			},
+			"inverseSide": {
+				"name": "people",
+				"ownedBy": "schedule",
+				"type": "OneHasMany",
+				"target": "Person"
+			}
+		},
+		{
+			"modification": "createRelation",
+			"entityName": "TrayItem",
+			"owningSide": {
+				"name": "programmeGroup",
+				"nullable": false,
+				"type": "ManyHasOne",
+				"target": "ProgrammeGroup",
+				"joiningColumn": {
+					"columnName": "programme_group_id",
+					"onDelete": "restrict"
+				}
+			}
+		},
+		{
+			"modification": "createRelation",
+			"entityName": "TrayItem",
+			"owningSide": {
+				"type": "ManyHasMany",
+				"name": "owner",
+				"target": "Person",
+				"joiningTable": {
+					"tableName": "tray_item_owner",
+					"joiningColumn": {
+						"columnName": "tray_item_id",
+						"onDelete": "cascade"
+					},
+					"inverseJoiningColumn": {
+						"columnName": "person_id",
+						"onDelete": "cascade"
+					}
+				},
+				"orderBy": [
+					{
+						"path": [
+							"name"
+						],
+						"direction": "asc"
+					}
+				]
+			}
+		},
+		{
+			"modification": "createRelation",
+			"entityName": "TrayItem",
+			"owningSide": {
+				"name": "schedule",
+				"nullable": false,
+				"type": "ManyHasOne",
+				"target": "Schedule",
+				"joiningColumn": {
+					"columnName": "schedule_id",
+					"onDelete": "restrict"
+				},
+				"inversedBy": "trayItems"
+			},
+			"inverseSide": {
+				"name": "trayItems",
+				"ownedBy": "schedule",
+				"type": "OneHasMany",
+				"target": "TrayItem"
+			}
+		},
+		{
+			"modification": "createRelation",
+			"entityName": "Plannable",
+			"owningSide": {
+				"name": "trayItem",
+				"inversedBy": "plannables",
+				"nullable": false,
+				"type": "ManyHasOne",
+				"target": "TrayItem",
+				"joiningColumn": {
+					"columnName": "tray_item_id",
+					"onDelete": "cascade"
+				}
+			},
+			"inverseSide": {
+				"name": "plannables",
+				"ownedBy": "trayItem",
+				"type": "OneHasMany",
+				"target": "Plannable"
+			}
+		},
+		{
+			"modification": "createRelation",
+			"entityName": "Plannable",
+			"owningSide": {
+				"type": "ManyHasMany",
+				"name": "atendeeGroups",
+				"target": "AtendeesGroup",
+				"joiningTable": {
+					"tableName": "plannable_atendee_groups",
+					"joiningColumn": {
+						"columnName": "plannable_id",
+						"onDelete": "cascade"
+					},
+					"inverseJoiningColumn": {
+						"columnName": "atendees_group_id",
+						"onDelete": "cascade"
+					}
+				}
+			}
+		},
+		{
+			"modification": "createRelation",
+			"entityName": "ScheduledItem",
+			"owningSide": {
+				"name": "plannable",
+				"nullable": false,
+				"type": "OneHasOne",
+				"target": "Plannable",
+				"joiningColumn": {
+					"columnName": "plannable_id",
+					"onDelete": "cascade"
+				},
+				"inversedBy": "scheduled"
+			},
+			"inverseSide": {
+				"name": "scheduled",
+				"ownedBy": "plannable",
+				"target": "ScheduledItem",
+				"type": "OneHasOne",
+				"nullable": true
+			}
+		},
+		{
+			"modification": "patchAclSchema",
+			"patch": [
+				{
+					"op": "add",
+					"path": "/roles/admin",
+					"value": {
+						"variables": {},
+						"stages": "*",
+						"entities": {
+							"Schedule": {
+								"predicates": {},
+								"operations": {
+									"create": {
+										"id": true,
+										"name": true,
+										"startDate": true,
+										"programmeGroups": true,
+										"atendeesGroups": true,
+										"people": true,
+										"trayItems": true
+									},
+									"read": {
+										"id": true,
+										"name": true,
+										"startDate": true,
+										"programmeGroups": true,
+										"atendeesGroups": true,
+										"people": true,
+										"trayItems": true
+									},
+									"update": {
+										"id": true,
+										"name": true,
+										"startDate": true,
+										"programmeGroups": true,
+										"atendeesGroups": true,
+										"people": true,
+										"trayItems": true
+									},
+									"delete": true
+								}
+							},
+							"ProgrammeGroup": {
+								"predicates": {},
+								"operations": {
+									"create": {
+										"id": true,
+										"schedule": true,
+										"name": true,
+										"color": true
+									},
+									"read": {
+										"id": true,
+										"schedule": true,
+										"name": true,
+										"color": true
+									},
+									"update": {
+										"id": true,
+										"schedule": true,
+										"name": true,
+										"color": true
+									},
+									"delete": true
+								}
+							},
+							"AtendeesGroup": {
+								"predicates": {},
+								"operations": {
+									"create": {
+										"id": true,
+										"schedule": true,
+										"name": true,
+										"regular": true
+									},
+									"read": {
+										"id": true,
+										"schedule": true,
+										"name": true,
+										"regular": true
+									},
+									"update": {
+										"id": true,
+										"schedule": true,
+										"name": true,
+										"regular": true
+									},
+									"delete": true
+								}
+							},
+							"Person": {
+								"predicates": {},
+								"operations": {
+									"create": {
+										"id": true,
+										"schedule": true,
+										"name": true
+									},
+									"read": {
+										"id": true,
+										"schedule": true,
+										"name": true
+									},
+									"update": {
+										"id": true,
+										"schedule": true,
+										"name": true
+									},
+									"delete": true
+								}
+							},
+							"TrayItem": {
+								"predicates": {},
+								"operations": {
+									"create": {
+										"id": true,
+										"schedule": true,
+										"title": true,
+										"description": true,
+										"duration": true,
+										"programmeGroup": true,
+										"owner": true,
+										"note": true,
+										"plannables": true
+									},
+									"read": {
+										"id": true,
+										"schedule": true,
+										"title": true,
+										"description": true,
+										"duration": true,
+										"programmeGroup": true,
+										"owner": true,
+										"note": true,
+										"plannables": true
+									},
+									"update": {
+										"id": true,
+										"schedule": true,
+										"title": true,
+										"description": true,
+										"duration": true,
+										"programmeGroup": true,
+										"owner": true,
+										"note": true,
+										"plannables": true
+									},
+									"delete": true
+								}
+							},
+							"Plannable": {
+								"predicates": {},
+								"operations": {
+									"create": {
+										"id": true,
+										"trayItem": true,
+										"atendeeGroups": true,
+										"scheduled": true
+									},
+									"read": {
+										"id": true,
+										"trayItem": true,
+										"atendeeGroups": true,
+										"scheduled": true
+									},
+									"update": {
+										"id": true,
+										"trayItem": true,
+										"atendeeGroups": true,
+										"scheduled": true
+									},
+									"delete": true
+								}
+							},
+							"ScheduledItem": {
+								"predicates": {},
+								"operations": {
+									"create": {
+										"id": true,
+										"start": true,
+										"plannable": true
+									},
+									"read": {
+										"id": true,
+										"start": true,
+										"plannable": true
+									},
+									"update": {
+										"id": true,
+										"start": true,
+										"plannable": true
+									},
+									"delete": true
+								}
+							}
+						}
+					}
+				}
+			]
+		}
+	]
+}
