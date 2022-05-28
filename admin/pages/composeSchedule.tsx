@@ -1,10 +1,12 @@
 import {
-	Component,
+	Box,
+	Button,
+	Component, Entity,
 	EntityAccessor,
 	Field,
 	HasMany,
-	HasOne,
-	PersistButton,
+	HasOne, NumberField,
+	PersistButton, SelectField, Stack, TextareaField, TextField,
 	useEntityList,
 	useField
 } from "@contember/admin";
@@ -13,6 +15,9 @@ import {Fragment, memo, useCallback, useMemo, useRef, useState} from "react";
 import {Temporal} from "@js-temporal/polyfill";
 import {FullScreenEditPage} from "../components/FullScreenEditPage";
 import classNames from "classnames";
+import {isTrayItemComplete, TrayItemForm} from "../components/trayItemForm";
+import {Dialog} from "../components/Dialog";
+import {isColorDark} from "../utils/isColorDark";
 
 const LOCAL_TIMEZONE = Temporal.TimeZone.from('Europe/Prague');
 
@@ -49,10 +54,11 @@ interface SegmentBoxProps {
 	dayIndex: number;
 	onDragStart: (ratio: number) => void;
 	onDragEnd: () => void;
+	onClick: () => void;
 }
 
 const SegmentBox = memo<SegmentBoxProps>(
-	({ segment, trayItem, earliestTime, latestTime, isHovering, isDragged = false, setHovering, dayIndex, onDragStart, onDragEnd }) => {
+	({ segment, trayItem, earliestTime, latestTime, isHovering, isDragged = false, setHovering, dayIndex, onDragStart, onDragEnd, onClick }) => {
 		const plannable = segment.plannable
 		const dayLength = earliestTime.until(latestTime)
 		const setStartTime = segment.start ?? earliestTime
@@ -69,6 +75,9 @@ const SegmentBox = memo<SegmentBoxProps>(
 			return null
 		}
 
+		const color = trayItem.getField<string>('programmeGroup.color').value;
+		const isDark = color !== null && isColorDark(color);
+
 		return (
 			<div
 				className={classNames(
@@ -77,6 +86,7 @@ const SegmentBox = memo<SegmentBoxProps>(
 					isDragged && 'scheduleTable__plannable--dragged',
 					(segment.start?.equals(startTime)) && 'scheduleTable__plannable--start',
 					(segment.end?.equals(endTime)) && 'scheduleTable__plannable--end',
+					isDark && 'scheduleTable__plannable--dark',
 				)}
 				style={{
 					'--segment-day': dayIndex,
@@ -84,7 +94,7 @@ const SegmentBox = memo<SegmentBoxProps>(
 					'--segment-duration': relativeDuration,
 					'--segment-group-first': segment.atendeeGroups[0],
 					'--segment-groups-count': segment.atendeeGroups.length,
-					'--segment-color': trayItem.getField('programmeGroup.color').value,
+					'--segment-color': color,
 				} as any}
 				onMouseEnter={() => setHovering(true)}
 				onMouseLeave={() => setHovering(false)}
@@ -110,6 +120,11 @@ const SegmentBox = memo<SegmentBoxProps>(
 					} else {
 						setClickWidthRatio(0)
 					}
+				}}
+
+				onClick={(e) => {
+					e.stopPropagation()
+					onClick()
 				}}
 			>
 				<div
@@ -262,7 +277,14 @@ const ComposeSchedule = Component(
 
 		const atendeesGroupsAccessor = useEntityList('atendeesGroups');
 		const atendeeGroups = useMemo(() => {
-			return Array.from(atendeesGroupsAccessor) // TODO: sort
+			const array = Array.from(atendeesGroupsAccessor);
+			array.sort((a, b) => {
+				if (a.getField<boolean>('regular').value! !== b.getField<boolean>('regular').value!) {
+					return a.getField<boolean>('regular').value ? -1 : 1
+				}
+				return a.getField<string>('name').value!.localeCompare(b.getField<string>('name').value!)
+			})
+			return array // TODO: sort
 		}, [atendeesGroupsAccessor])
 		const sortedAttendeGroupIds = useMemo(() => {
 			return atendeeGroups.map(it => it.id)
@@ -314,6 +336,7 @@ const ComposeSchedule = Component(
 			const earliest = segments
 				.flatMap((it): (Temporal.PlainTime | null)[] => [
 					it.start,
+					it.end,
 					it.end?.subtract(Temporal.Duration.from({minutes: 15})) ?? null,
 				])
 				.filter((it): it is Temporal.PlainTime => it !== null)
@@ -324,6 +347,7 @@ const ComposeSchedule = Component(
 
 			const latest = segments
 				.flatMap((it): (Temporal.PlainTime | null)[] => [
+					it.start,
 					it.start?.add(Temporal.Duration.from({minutes: 60})) ?? null,
 					it.end,
 				])
@@ -351,36 +375,38 @@ const ComposeSchedule = Component(
 		const [hoveringPlannable, setHoveringPlannable] = useState<string | null>(null)
 		const ref = useRef<HTMLDivElement>(null)
 
+		const getDateTimeForPosition = useCallback(([clientX, clientY]: [number, number], minutesOffset: number = 0): Temporal.PlainDateTime | null => {
+			for (const dayEl of ref.current?.querySelectorAll('.scheduleTable__day') ?? []) {
+				const rect = dayEl.getBoundingClientRect()
+				if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+					const day = Temporal.PlainDate.from(dayEl.getAttribute('data-date')!)
+					const pixelsInMinutes = (10 / rect.width) * dayLength.total({unit: 'minutes'})
+					// const alignTo = [5, 10, 30, 60].find(it => pixelsInMinutes <= it)
+					const alignTo = 5
+					const relativeX = (clientX - rect.left) / rect.width
+
+					const time = earliestTime.add({minutes: Math.floor(relativeX * dayLength.total({unit: 'minutes'}) - minutesOffset)}).round({
+						roundingIncrement: alignTo,
+						smallestUnit: 'minutes',
+						roundingMode: 'floor'
+					})
+					return day.toPlainDateTime(time)
+				}
+			}
+			return null
+		}, [ref, dayLength, earliestTime])
+
 		const onDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 			if (e.dataTransfer.types.includes(MIME_TYPE) && draggingPlannable !== null) {
 				e.preventDefault()
-				for (const dayEl of ref.current?.querySelectorAll('.scheduleTable__day') ?? []) {
-					const rect = dayEl.getBoundingClientRect()
-					if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
-						const day = Temporal.PlainDate.from(dayEl.getAttribute('data-date')!)
-						const pixelsInMinutes = (10 / rect.width) * dayLength.total({unit: 'minutes'})
-						const alignTo = [5, 10, 30, 60].find(it => pixelsInMinutes <= it)
-						const relativeX = (e.clientX - rect.left) / rect.width
-
-						const widthRatio = draggingPlannable.widthRatio ?? 0
-						const plannable = allPlannables.find(it => it.id === draggingPlannable.id)!
-						const trayItem = plannableToTrayItem.get(plannable)!
-						const duration = Temporal.Duration.from({minutes: trayItem.getField<number>('duration').value!})
-						const offset = duration.total({unit: 'minutes'}) * widthRatio
-
-
-						const time = earliestTime.add({minutes: Math.floor(relativeX * dayLength.total({unit: 'minutes'}) - offset)}).round({
-							roundingIncrement: alignTo,
-							smallestUnit: 'minutes',
-							roundingMode: 'floor'
-						})
-						const dateTime = day.toPlainDateTime(time)
-						setDraggingPlannableStart(dateTime)
-						return
-					}
-				}
+				const widthRatio = draggingPlannable.widthRatio ?? 0
+				const plannable = allPlannables.find(it => it.id === draggingPlannable.id)!
+				const trayItem = plannableToTrayItem.get(plannable)!
+				const duration = Temporal.Duration.from({minutes: trayItem.getField<number>('duration').value!})
+				const offset = duration.total({unit: 'minutes'}) * widthRatio
+				setDraggingPlannableStart(getDateTimeForPosition([e.clientX, e.clientY], offset))
 			}
-		}, [ref, setDraggingPlannableStart, dayLength, earliestTime, draggingPlannable, allPlannables, plannableToTrayItem])
+		}, [setDraggingPlannableStart, earliestTime, draggingPlannable, allPlannables, plannableToTrayItem, getDateTimeForPosition])
 
 		const onDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 			if (e.dataTransfer.types.includes(MIME_TYPE)) {
@@ -418,9 +444,42 @@ const ComposeSchedule = Component(
 			}
 		}, [draggingPlannable, draggingPlannableStart, allPlannables, setDraggingPlannable, setDraggingPlannableStart])
 
+		const [createStartTime, setCreateStartTime] = useState<[Temporal.PlainDateTime, string] | null>(null)
+		const creatingPlannable = useMemo(() => {
+			return createStartTime !== null ? trayItems.getChildEntityById(createStartTime[1]) : null
+		}, [trayItems, createStartTime])
+
+		const onClickToCreate = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+			const start = getDateTimeForPosition([e.clientX, e.clientY])
+			if (!start) {
+				return
+			}
+			const id = trayItems.createNewEntity().value
+			setCreateStartTime([start, id])
+		}, [getDateTimeForPosition, setCreateStartTime])
+
+		const onDialogDismiss = useCallback(() => {
+			creatingPlannable?.deleteEntity()
+			setCreateStartTime(null)
+		}, [creatingPlannable, setCreateStartTime])
+
+		const onDialogSave = useCallback(() => {
+			const id = createStartTime?.[1]
+			if (id) {
+				const entity = trayItems.getChildEntityById(id)
+				const startValue = createStartTime![0].toZonedDateTime(LOCAL_TIMEZONE).toInstant().toString();
+				for (const plannable of entity.getEntityList('plannables')) {
+					plannable.getField('scheduled.start').updateValue(startValue)
+				}
+				setCreateStartTime(null)
+			}
+		}, [createStartTime, trayItems])
+
+
+		const [editingTrayItem, setEditingTrayItem] = useState<string | null>(null)
 
 		return (
-			<div className="schedulePage">
+			<div className="schedulePage scheme-light">
 				<div
 					ref={ref}
 					className="scheduleTable"
@@ -430,6 +489,7 @@ const ComposeSchedule = Component(
 					} as any}
 					onDragOver={onDragOver}
 					onDrop={onDrop}
+					onClick={onClickToCreate}
 				>
 					<div
 						className="scheduleTable__actions"
@@ -465,6 +525,9 @@ const ComposeSchedule = Component(
 								setDraggingPlannable(null)
 								setDraggingPlannableStart(null)
 							}}
+							onClick={() => {
+								setEditingTrayItem(plannableToTrayItem.get(segment.plannable)!.id)
+							}}
 						/>
 					))}
 
@@ -488,9 +551,14 @@ const ComposeSchedule = Component(
 								setDraggingPlannable(null)
 								setDraggingPlannableStart(null)
 							}}
+							onClick={() => {
+								setEditingTrayItem(plannableToTrayItem.get(segment.plannable)!.id)
+							}}
 						/>
 					))}
 				</div>
+
+
 				<div
 					className="schedulePage__tray"
 					onDragOver={onTrayDragOver}
@@ -498,11 +566,16 @@ const ComposeSchedule = Component(
 				>
 					{notScheduledPlannables.map(plannable => {
 						const trayItem = plannableToTrayItem.get(plannable)!;
+						const color = trayItem.getField<string>('programmeGroup.color').value;
+						const isDark = color !== null ? isColorDark(color) : false;
 						return (
 								<div
-									className='schedulePage__traySegment'
+									className={classNames(
+										'schedulePage__traySegment',
+										isDark && 'schedulePage__traySegment--dark',
+									)}
 									style={{
-										'--segment-color': trayItem.getField('programmeGroup.color').value,
+										'--segment-color': color,
 									} as any}
 
 									draggable={true}
@@ -511,17 +584,42 @@ const ComposeSchedule = Component(
 										e.dataTransfer.effectAllowed = "move"
 										setDraggingPlannable({ id: plannable.id })
 									}}
+									onClick={() => {
+										setEditingTrayItem(trayItem.id)
+									}}
 								>
 									{trayItem.getField('title').value}
 								</div>
 							);
 						}
 					)}
-
 				</div>
+
+
+				{creatingPlannable && (
+					<Dialog
+						onDismiss={onDialogDismiss}
+						onSubmit={onDialogSave}
+						submitDisabled={!isTrayItemComplete(creatingPlannable)}
+					>
+						<Entity accessor={creatingPlannable}>
+							<TrayItemForm />
+						</Entity>
+					</Dialog>
+				)}
+
+				{editingTrayItem && (
+					<Dialog
+						onDismiss={() => setEditingTrayItem(null)}
+						onSubmit={() => setEditingTrayItem(null)}
+					>
+						<Entity accessor={trayItems.getChildEntityById(editingTrayItem)}>
+							<TrayItemForm />
+						</Entity>
+					</Dialog>
+				)}
 			</div>
 		)
-
 	},
 	() => (
 		<>
@@ -531,6 +629,7 @@ const ComposeSchedule = Component(
 				<Field field="regular" />
 			</HasMany>
 			<HasMany field="trayItems">
+				<TrayItemForm />
 				<Field field="title" />
 				<Field field="description" />
 				<Field field="duration" />
@@ -544,7 +643,6 @@ const ComposeSchedule = Component(
 				</HasMany>
 			</HasMany>
 		</>
-
 	),
 )
 
