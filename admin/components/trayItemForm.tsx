@@ -66,7 +66,7 @@ const CheckboxHasOne = Component<CheckboxHasOneField>(
 const PlannablesEdit = Component(
 	() => {
 		const list = useEntityList('plannables')
-		const options = useEntityListSubTree({entities: 'AtendeesGroup'})
+		const options = useEntityListSubTree({entities: 'AtendeesGroup[schedule.id=$scheduleId]'})
 
 		const createPlannables = React.useCallback((count: number, regular: boolean) => {
 			const base = Array.from(options).filter(it => it.getField('regular').value === regular)
@@ -96,7 +96,7 @@ const PlannablesEdit = Component(
 		} else {
 			return (
 				<Repeater label={undefined} field="plannables" orderBy={undefined}>
-					<MultiSelectField label="Skupiny" field="atendeeGroups" options="AtendeesGroup.name" />
+					<MultiSelectField label="Skupiny" field="atendeeGroups" options="AtendeesGroup[schedule.id=$scheduleId].name" />
 					<CheckboxHasOne field="scheduled" label="Naplánované" create={(acc) => acc.getField('start').updateValue('')}>
 						<DateTimeField label="Začátek" field="start" />
 					</CheckboxHasOne>
@@ -109,7 +109,7 @@ const PlannablesEdit = Component(
 			<MultiSelectField
 				label="Skupiny"
 				field="atendeeGroups"
-				options="AtendeesGroup"
+				options="AtendeesGroup[schedule.id=$scheduleId]"
 				renderOption={() => null}
 				optionsStaticRender={<>
 					<Field field="name" />
@@ -179,7 +179,7 @@ export const TrayItemForm = Component(
 	() =>
 		(
 			<Stack direction="vertical">
-				<TextField label="Název" field="title" />
+				<TextField label="Název*" field="title" />
 				<TextareaField label="Popis" field="description" />
 				<Stack direction="horizontal" align="end">
 					<Stack direction="vertical" grow>
@@ -192,10 +192,10 @@ export const TrayItemForm = Component(
 					</ButtonGroup>
 				</Stack>
 				<RadioField
-					label="Skupina programů"
+					label="Skupina programů*"
 					field="programmeGroup"
 					options={{
-						entities: "ProgrammeGroup",
+						entities: "ProgrammeGroup[schedule.id=$scheduleId]",
 						orderBy: "name",
 					}}
 					renderOption={acc => acc.getField('name').value}
@@ -207,7 +207,7 @@ export const TrayItemForm = Component(
 					)}
 					orientation="horizontal"
 				/>
-				<MultiSelectField label="Garanti programu" field="owner" options="Person.name" />
+				<MultiSelectField label="Garanti programu" field="owner" options="Person[schedule.id=$scheduleId].name" />
 				<TextareaField label="Poznámka" field="note" />
 
 				<FieldContainer useLabelElement={false} label="Výběr skupin">

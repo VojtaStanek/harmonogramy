@@ -5,7 +5,7 @@ export default () => (
 	<DataGridPage entities="Schedule" rendererProps={{ title: "Harmonogramy", actions: <LinkButton to="createSchedule">Nový harmonogram</LinkButton> }}>
 		<TextCell header="Název" field="name" />
 		<GenericCell shrunk canBeHidden={false}>
-			<LinkButton to="editSchedule(scheduleId:$entity.id)">Změnit</LinkButton>
+			<LinkButton to="editSchedule(scheduleId:$entity.id)">Nastavení</LinkButton>
 		</GenericCell>
 		<GenericCell shrunk canBeHidden={false}>
 			<LinkButton to="tray(scheduleId:$entity.id)">Zásobník</LinkButton>

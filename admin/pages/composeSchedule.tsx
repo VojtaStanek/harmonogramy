@@ -1,11 +1,12 @@
 import {
+	AnchorButton,
 	Box,
 	Button,
 	Component, Entity,
 	EntityAccessor,
 	Field,
 	HasMany,
-	HasOne, NumberField,
+	HasOne, Icon, LinkButton, NumberField,
 	PersistButton, SelectField, Stack, TextareaField, TextField,
 	useEntityList,
 	useField
@@ -444,10 +445,16 @@ const ComposeSchedule = Component(
 			}
 		}, [draggingPlannable, draggingPlannableStart, allPlannables, setDraggingPlannable, setDraggingPlannableStart])
 
-		const [createStartTime, setCreateStartTime] = useState<[Temporal.PlainDateTime, string] | null>(null)
+		const [createStartTime, setCreateStartTime] = useState<[Temporal.PlainDateTime | null, string] | null>(null)
 		const creatingPlannable = useMemo(() => {
 			return createStartTime !== null ? trayItems.getChildEntityById(createStartTime[1]) : null
 		}, [trayItems, createStartTime])
+
+
+		const onCreateTrayItem = useCallback(() => {
+			const id = trayItems.createNewEntity().value
+			setCreateStartTime([null, id])
+		}, [trayItems, setCreateStartTime])
 
 		const onClickToCreate = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
 			const start = getDateTimeForPosition([e.clientX, e.clientY])
@@ -456,7 +463,7 @@ const ComposeSchedule = Component(
 			}
 			const id = trayItems.createNewEntity().value
 			setCreateStartTime([start, id])
-		}, [getDateTimeForPosition, setCreateStartTime])
+		}, [trayItems, getDateTimeForPosition, setCreateStartTime])
 
 		const onDialogDismiss = useCallback(() => {
 			creatingPlannable?.deleteEntity()
@@ -464,10 +471,10 @@ const ComposeSchedule = Component(
 		}, [creatingPlannable, setCreateStartTime])
 
 		const onDialogSave = useCallback(() => {
-			const id = createStartTime?.[1]
-			if (id) {
+			if (createStartTime !== null) {
+				const [time, id] = createStartTime
 				const entity = trayItems.getChildEntityById(id)
-				const startValue = createStartTime![0].toZonedDateTime(LOCAL_TIMEZONE).toInstant().toString();
+				const startValue = time?.toZonedDateTime(LOCAL_TIMEZONE).toInstant().toString() ?? null;
 				for (const plannable of entity.getEntityList('plannables')) {
 					plannable.getField('scheduled.start').updateValue(startValue)
 				}
@@ -497,6 +504,7 @@ const ComposeSchedule = Component(
 						<div>
 							<PersistButton size="small" flow="block" labelSave="Uložit" labelSaved="Uloženo" />
 						</div>
+							<LinkButton to="editSchedule(scheduleId:$request.scheduleId)" disabled={trayItems.hasUnpersistedChanges} distinction="outlined" size="small" flow="squarish"><Icon blueprintIcon="cog" /></LinkButton>
 					</div>
 
 					<DateLabels dates={dates} atendeeGroups={atendeeGroups} />
@@ -564,6 +572,11 @@ const ComposeSchedule = Component(
 					onDragOver={onTrayDragOver}
 					onDrop={onTrayDrop}
 				>
+					<div className="schedulePage_trayHeader">
+						<h2 className="schedulePage_trayHeaderTitle">Zásobník</h2>
+						<Button onClick={onCreateTrayItem} distinction="outlined" size="small" flow="squarish"><Icon blueprintIcon="plus" /></Button>
+					</div>
+					{/*<LinkButton to="tray(scheduleId: $request.scheduleId)" distinction="outlined" size="small">Přidat</LinkButton>*/}
 					{notScheduledPlannables.map(plannable => {
 						const trayItem = plannableToTrayItem.get(plannable)!;
 						const color = trayItem.getField<string>('programmeGroup.color').value;

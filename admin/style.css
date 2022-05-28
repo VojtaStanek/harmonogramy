@@ -15,6 +15,19 @@
 	height: 100%;
 }
 
+.schedulePage_trayHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 1em;
+}
+
+.schedulePage_trayHeaderTitle {
+	margin: 0;
+	font-size: 1.3em;
+	line-height: 1;
+}
+
 .schedulePage__traySegment {
 	padding: .2em .4em;
 	/*width: calc(var(--segment-duration) * 100% - 2px);*/
@@ -46,7 +59,8 @@
 	grid-column: 1 / span 2;
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	justify-content: space-between;
+	padding-right: 1em;
 }
 
 .scheduleTable__dayLabel {
