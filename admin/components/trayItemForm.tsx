@@ -117,7 +117,7 @@ const PlannablesEdit = Component(
 				</>}
 			/>
 
-			<CheckboxHasOne field="scheduled" label="Naplánované">
+			<CheckboxHasOne field="scheduled" label="Naplánované" create={() => {}}>
 				<DateTimeField label="Začátek" field="start" />
 			</CheckboxHasOne>
 		</Repeater>

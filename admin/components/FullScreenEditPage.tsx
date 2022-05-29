@@ -1,4 +1,4 @@
-import {DataBindingProvider, EntitySubTree, FeedbackRenderer, SugaredQualifiedSingleEntity, SugaredQualifiedSingleEntity } from '@contember/admin'
+import {DataBindingProvider, EntitySubTree, FeedbackRenderer, SugaredQualifiedSingleEntity } from '@contember/admin'
 import * as React from 'react'
 import { ComponentType, memo, ReactNode } from 'react'
 

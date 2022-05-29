@@ -1,0 +1,29 @@
+{
+	"formatVersion": 3,
+	"modifications": [
+		{
+			"modification": "updateRelationOnDelete",
+			"entityName": "ProgrammeGroup",
+			"fieldName": "schedule",
+			"onDelete": "cascade"
+		},
+		{
+			"modification": "updateRelationOnDelete",
+			"entityName": "AtendeesGroup",
+			"fieldName": "schedule",
+			"onDelete": "cascade"
+		},
+		{
+			"modification": "updateRelationOnDelete",
+			"entityName": "Person",
+			"fieldName": "schedule",
+			"onDelete": "cascade"
+		},
+		{
+			"modification": "updateRelationOnDelete",
+			"entityName": "TrayItem",
+			"fieldName": "schedule",
+			"onDelete": "cascade"
+		}
+	]
+}

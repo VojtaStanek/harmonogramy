@@ -1,17 +1,14 @@
 import * as React from 'react'
-import { DataGridPage, GenericCell, GenericPage, LinkButton, TextCell } from '@contember/admin'
+import {DataGridPage, DeleteEntityButton, GenericCell, GenericPage, LinkButton, TextCell} from '@contember/admin'
 
 export default () => (
-	<DataGridPage entities="Schedule" rendererProps={{ title: "Harmonogramy", actions: <LinkButton to="createSchedule">Nový harmonogram</LinkButton> }}>
+	<DataGridPage entities="Workspace" rendererProps={{ title: "Prostory", actions: <LinkButton to="createWorkspace">Nový prostor</LinkButton> }}>
 		<TextCell header="Název" field="name" />
 		<GenericCell shrunk canBeHidden={false}>
-			<LinkButton to="editSchedule(scheduleId:$entity.id)">Nastavení</LinkButton>
+			<LinkButton to="workspace(workspaceId:$entity.id)">Harmonogramy</LinkButton>
 		</GenericCell>
 		<GenericCell shrunk canBeHidden={false}>
-			<LinkButton to="tray(scheduleId:$entity.id)">Zásobník</LinkButton>
-		</GenericCell>
-		<GenericCell shrunk canBeHidden={false}>
-			<LinkButton to="composeSchedule(scheduleId:$entity.id)">Plánovat</LinkButton>
+			<DeleteEntityButton immediatePersist />
 		</GenericCell>
 	</DataGridPage>
 )

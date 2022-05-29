@@ -1,0 +1,333 @@
+{
+	"formatVersion": 3,
+	"modifications": [
+		{
+			"modification": "createEntity",
+			"entity": {
+				"name": "Workspace",
+				"primary": "id",
+				"primaryColumn": "id",
+				"tableName": "workspace",
+				"fields": {
+					"id": {
+						"name": "id",
+						"columnName": "id",
+						"columnType": "uuid",
+						"nullable": false,
+						"type": "Uuid"
+					}
+				},
+				"unique": {},
+				"eventLog": {
+					"enabled": true
+				}
+			}
+		},
+		{
+			"modification": "createColumn",
+			"entityName": "Workspace",
+			"field": {
+				"name": "name",
+				"columnName": "name",
+				"columnType": "text",
+				"nullable": false,
+				"type": "String"
+			}
+		},
+		{
+			"modification": "createRelation",
+			"entityName": "Schedule",
+			"owningSide": {
+				"type": "ManyHasOne",
+				"name": "workspace",
+				"target": "Workspace",
+				"joiningColumn": {
+					"columnName": "workspace_id",
+					"onDelete": "cascade"
+				},
+				"nullable": false,
+				"inversedBy": "schedules"
+			},
+			"inverseSide": {
+				"type": "OneHasMany",
+				"name": "schedules",
+				"target": "Schedule",
+				"ownedBy": "workspace"
+			}
+		},
+		{
+			"modification": "patchAclSchema",
+			"patch": [
+				{
+					"op": "remove",
+					"path": "/roles/admin"
+				},
+				{
+					"op": "add",
+					"path": "/roles/workspaceAdmin",
+					"value": {
+						"stages": "*",
+						"entities": {
+							"AtendeesGroup": {
+								"predicates": {
+									"schedule_workspace_id_workspa": {
+										"schedule": {
+											"workspace": {
+												"id": "workspace"
+											}
+										}
+									}
+								},
+								"operations": {
+									"read": {
+										"schedule": "schedule_workspace_id_workspa",
+										"name": "schedule_workspace_id_workspa",
+										"regular": "schedule_workspace_id_workspa"
+									},
+									"create": {
+										"schedule": "schedule_workspace_id_workspa",
+										"name": "schedule_workspace_id_workspa",
+										"regular": "schedule_workspace_id_workspa"
+									},
+									"update": {
+										"schedule": "schedule_workspace_id_workspa",
+										"name": "schedule_workspace_id_workspa",
+										"regular": "schedule_workspace_id_workspa"
+									},
+									"delete": "schedule_workspace_id_workspa"
+								}
+							},
+							"Person": {
+								"predicates": {
+									"schedule_workspace_id_workspa": {
+										"schedule": {
+											"workspace": {
+												"id": "workspace"
+											}
+										}
+									}
+								},
+								"operations": {
+									"read": {
+										"schedule": "schedule_workspace_id_workspa",
+										"name": "schedule_workspace_id_workspa"
+									},
+									"create": {
+										"schedule": "schedule_workspace_id_workspa",
+										"name": "schedule_workspace_id_workspa"
+									},
+									"update": {
+										"schedule": "schedule_workspace_id_workspa",
+										"name": "schedule_workspace_id_workspa"
+									},
+									"delete": "schedule_workspace_id_workspa"
+								}
+							},
+							"Plannable": {
+								"predicates": {
+									"trayItem_schedule_workspace_i": {
+										"trayItem": {
+											"schedule": {
+												"workspace": {
+													"id": "workspace"
+												}
+											}
+										}
+									}
+								},
+								"operations": {
+									"read": {
+										"trayItem": "trayItem_schedule_workspace_i",
+										"atendeeGroups": "trayItem_schedule_workspace_i",
+										"scheduled": "trayItem_schedule_workspace_i"
+									},
+									"create": {
+										"trayItem": "trayItem_schedule_workspace_i",
+										"atendeeGroups": "trayItem_schedule_workspace_i",
+										"scheduled": "trayItem_schedule_workspace_i"
+									},
+									"update": {
+										"trayItem": "trayItem_schedule_workspace_i",
+										"atendeeGroups": "trayItem_schedule_workspace_i",
+										"scheduled": "trayItem_schedule_workspace_i"
+									},
+									"delete": "trayItem_schedule_workspace_i"
+								}
+							},
+							"ProgrammeGroup": {
+								"predicates": {
+									"schedule_workspace_id_workspa": {
+										"schedule": {
+											"workspace": {
+												"id": "workspace"
+											}
+										}
+									}
+								},
+								"operations": {
+									"read": {
+										"schedule": "schedule_workspace_id_workspa",
+										"name": "schedule_workspace_id_workspa",
+										"color": "schedule_workspace_id_workspa"
+									},
+									"create": {
+										"schedule": "schedule_workspace_id_workspa",
+										"name": "schedule_workspace_id_workspa",
+										"color": "schedule_workspace_id_workspa"
+									},
+									"update": {
+										"schedule": "schedule_workspace_id_workspa",
+										"name": "schedule_workspace_id_workspa",
+										"color": "schedule_workspace_id_workspa"
+									},
+									"delete": "schedule_workspace_id_workspa"
+								}
+							},
+							"Schedule": {
+								"predicates": {
+									"workspace_id_workspace": {
+										"workspace": {
+											"id": "workspace"
+										}
+									}
+								},
+								"operations": {
+									"read": {
+										"workspace": "workspace_id_workspace",
+										"name": "workspace_id_workspace",
+										"startDate": "workspace_id_workspace",
+										"programmeGroups": "workspace_id_workspace",
+										"atendeesGroups": "workspace_id_workspace",
+										"people": "workspace_id_workspace",
+										"trayItems": "workspace_id_workspace"
+									},
+									"create": {
+										"workspace": "workspace_id_workspace",
+										"name": "workspace_id_workspace",
+										"startDate": "workspace_id_workspace",
+										"programmeGroups": "workspace_id_workspace",
+										"atendeesGroups": "workspace_id_workspace",
+										"people": "workspace_id_workspace",
+										"trayItems": "workspace_id_workspace"
+									},
+									"update": {
+										"workspace": "workspace_id_workspace",
+										"name": "workspace_id_workspace",
+										"startDate": "workspace_id_workspace",
+										"programmeGroups": "workspace_id_workspace",
+										"atendeesGroups": "workspace_id_workspace",
+										"people": "workspace_id_workspace",
+										"trayItems": "workspace_id_workspace"
+									},
+									"delete": "workspace_id_workspace"
+								}
+							},
+							"ScheduledItem": {
+								"predicates": {
+									"plannable_trayItem_schedule_w": {
+										"plannable": {
+											"trayItem": {
+												"schedule": {
+													"workspace": {
+														"id": "workspace"
+													}
+												}
+											}
+										}
+									}
+								},
+								"operations": {
+									"read": {
+										"start": "plannable_trayItem_schedule_w",
+										"plannable": "plannable_trayItem_schedule_w"
+									},
+									"create": {
+										"start": "plannable_trayItem_schedule_w",
+										"plannable": "plannable_trayItem_schedule_w"
+									},
+									"update": {
+										"start": "plannable_trayItem_schedule_w",
+										"plannable": "plannable_trayItem_schedule_w"
+									},
+									"delete": "plannable_trayItem_schedule_w"
+								}
+							},
+							"TrayItem": {
+								"predicates": {
+									"schedule_workspace_id_workspa": {
+										"schedule": {
+											"workspace": {
+												"id": "workspace"
+											}
+										}
+									}
+								},
+								"operations": {
+									"read": {
+										"schedule": "schedule_workspace_id_workspa",
+										"title": "schedule_workspace_id_workspa",
+										"description": "schedule_workspace_id_workspa",
+										"duration": "schedule_workspace_id_workspa",
+										"programmeGroup": "schedule_workspace_id_workspa",
+										"owner": "schedule_workspace_id_workspa",
+										"note": "schedule_workspace_id_workspa",
+										"plannables": "schedule_workspace_id_workspa"
+									},
+									"create": {
+										"schedule": "schedule_workspace_id_workspa",
+										"title": "schedule_workspace_id_workspa",
+										"description": "schedule_workspace_id_workspa",
+										"duration": "schedule_workspace_id_workspa",
+										"programmeGroup": "schedule_workspace_id_workspa",
+										"owner": "schedule_workspace_id_workspa",
+										"note": "schedule_workspace_id_workspa",
+										"plannables": "schedule_workspace_id_workspa"
+									},
+									"update": {
+										"schedule": "schedule_workspace_id_workspa",
+										"title": "schedule_workspace_id_workspa",
+										"description": "schedule_workspace_id_workspa",
+										"duration": "schedule_workspace_id_workspa",
+										"programmeGroup": "schedule_workspace_id_workspa",
+										"owner": "schedule_workspace_id_workspa",
+										"note": "schedule_workspace_id_workspa",
+										"plannables": "schedule_workspace_id_workspa"
+									},
+									"delete": "schedule_workspace_id_workspa"
+								}
+							},
+							"Workspace": {
+								"predicates": {
+									"id_workspace": {
+										"id": "workspace"
+									}
+								},
+								"operations": {
+									"read": {
+										"name": "id_workspace",
+										"schedules": "id_workspace"
+									},
+									"create": {
+										"name": "id_workspace",
+										"schedules": "id_workspace"
+									},
+									"update": {
+										"name": "id_workspace",
+										"schedules": "id_workspace"
+									},
+									"delete": "id_workspace"
+								}
+							}
+						},
+						"variables": {
+							"workspace": {
+								"type": "entity",
+								"entityName": "Workspace"
+							}
+						}
+					}
+				}
+			]
+		}
+	]
+}
