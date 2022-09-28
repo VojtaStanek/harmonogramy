@@ -6,12 +6,13 @@
     "start-admin": "vite admin --port 1480 --host 0.0.0.0",
     "build": "npm run build-admin && npm run build-api",
     "build-admin": "tsc --project admin && vite build admin",
+		"build-public": "tsc --project admin && vite build admin --mode public",
     "build-api": "tsc --project api",
     "deploy": "npm run build && docker-compose run contember-cli deploy"
   },
   "devDependencies": {
-    "@contember/admin": "^1.0.0",
-		"@contember/admin-i18n": "^1.0.0",
+    "@contember/admin": "^1.1.0-alpha.14",
+		"@contember/admin-i18n": "^1.1.0-alpha.14",
     "@contember/schema": "1.1.0-beta.3",
     "@contember/schema-definition": "1.1.0-beta.3",
     "@types/react": "^17",

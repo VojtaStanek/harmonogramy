@@ -2,6 +2,7 @@ import {
 	Button,
 	Component, Entity,
 	EntityAccessor,
+	EntityId,
 	Field,
 	HasMany,
 	HasOne, Icon, LinkButton, PersistButton, useEntityList,
@@ -100,7 +101,7 @@ const SegmentBox = memo<SegmentBoxProps>(
 					draggable: true,
 					onDragStart: (e) => {
 						console.log(e.nativeEvent)
-						e.dataTransfer.setData(MIME_TYPE, plannable.id)
+						e.dataTransfer.setData(MIME_TYPE, plannable.id as string)
 						e.dataTransfer.effectAllowed = "move"
 
 						const canvas = document.createElement("canvas");
@@ -321,7 +322,7 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 		}, [scheduledPlannables, createSegmentsForPlannable])
 
 
-		const [draggingPlannable, setDraggingPlannable] = useState<{id: string, widthRatio?: number} | null>(null)
+		const [draggingPlannable, setDraggingPlannable] = useState<{id: EntityId, widthRatio?: number} | null>(null)
 		const [draggingPlannableStart, setDraggingPlannableStart] = useState<Temporal.PlainDateTime | null>(null)
 		const shadowSegments = useMemo(() => {
 			if (draggingPlannable === null || draggingPlannableStart === null) {
@@ -372,7 +373,7 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 			return labels
 		}, [earliestTime, dayLength])
 
-		const [hoveringPlannable, setHoveringPlannable] = useState<string | null>(null)
+		const [hoveringPlannable, setHoveringPlannable] = useState<EntityId | null>(null)
 		const ref = useRef<HTMLDivElement>(null)
 
 		const getDateTimeForPosition = useCallback(([clientX, clientY]: [number, number], minutesOffset: number = 0): Temporal.PlainDateTime | null => {
@@ -444,7 +445,7 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 			}
 		}, [draggingPlannable, draggingPlannableStart, allPlannables, setDraggingPlannable, setDraggingPlannableStart])
 
-		const [createStartTime, setCreateStartTime] = useState<[Temporal.PlainDateTime | null, string] | null>(null)
+		const [createStartTime, setCreateStartTime] = useState<[Temporal.PlainDateTime | null, EntityId] | null>(null)
 		const creatingPlannable = useMemo(() => {
 			return createStartTime !== null ? trayItems.getChildEntityById(createStartTime[1]) : null
 		}, [trayItems, createStartTime])
@@ -482,7 +483,7 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 		}, [createStartTime, trayItems])
 
 
-		const [editingTrayItem, setEditingTrayItem] = useState<string | null>(null)
+		const [editingTrayItem, setEditingTrayItem] = useState<EntityId | null>(null)
 
 		return (
 			<div className="schedulePage scheme-light">
@@ -493,9 +494,11 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 						'--groups-count': atendeeGroups.length,
 						'--days-count': dates.length,
 					} as any}
-					onDragOver={onDragOver}
-					onDrop={onDrop}
-					onClick={onClickToCreate}
+					{...(editable ? {
+						onDragOver: onDragOver,
+						onDrop: onDrop,
+						onClick: onClickToCreate,
+					} : {})}
 				>
 					<div
 						className="scheduleTable__actions"
@@ -599,7 +602,7 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 
 										draggable={true}
 										onDragStart={(e) => {
-											e.dataTransfer.setData(MIME_TYPE, plannable.id)
+											e.dataTransfer.setData(MIME_TYPE, plannable.id as string)
 											e.dataTransfer.effectAllowed = "move"
 											setDraggingPlannable({ id: plannable.id })
 										}}

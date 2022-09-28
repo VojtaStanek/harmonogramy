@@ -26,17 +26,18 @@ interface CheckboxHasOneField {
 	label: string
 	children: React.ReactNode
 	create: (accessor: EntityAccessor) => void
+	disabled?: boolean
 }
 
 const CheckboxHasOne = Component<CheckboxHasOneField>(
-	({field, label, children, create}) => {
+	({field, label, children, create, disabled}) => {
 		const entity = useEntity(field)
 		const exists = entity.existsOnServer || entity.hasUnpersistedChanges
 		const [, update] = useState(0)
 		return (
 			<Stack direction="vertical">
 				<FieldContainer label={label} labelPosition="labelInlineRight">
-					<input type={"checkbox"} checked={exists} onChange={e => {
+					<input disabled={disabled} type={"checkbox"} checked={exists} onChange={e => {
 						e.preventDefault()
 						const value = e.target.checked
 						if (value) {
@@ -97,8 +98,8 @@ const PlannablesEdit = Component<{ editable: boolean }>(
 			return (
 				<Repeater label={undefined} field="plannables" orderBy={undefined} enableAddingNew={editable} enableRemoving={editable}>
 					<MultiSelectField label="Skupiny" field="atendeeGroups" options="AtendeesGroup[schedule.id=$scheduleId].name" />
-					<CheckboxHasOne field="scheduled" label="Naplánované" create={(acc) => acc.getField('start').updateValue('')}>
-						<DateTimeField label="Začátek" field="start" />
+					<CheckboxHasOne field="scheduled" label="Naplánované" create={(acc) => acc.getField('start').updateValue('')} disabled={!editable}>
+						<DateTimeField label="Začátek" field="start" disabled={!editable} />
 					</CheckboxHasOne>
 				</Repeater>
 			)
