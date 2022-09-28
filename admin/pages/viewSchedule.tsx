@@ -4,6 +4,6 @@ import {ComposeSchedule} from "../components/ComposeSchedule";
 
 export default () => (
 	<FullScreenEditPage entity="Schedule(id=$scheduleId)">
-		<ComposeSchedule editable={true} />
+		<ComposeSchedule editable={false} />
 	</FullScreenEditPage>
 )

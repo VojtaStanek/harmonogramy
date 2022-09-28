@@ -63,8 +63,8 @@ const CheckboxHasOne = Component<CheckboxHasOneField>(
 		</HasOne>
 	)
 )
-const PlannablesEdit = Component(
-	() => {
+const PlannablesEdit = Component<{ editable: boolean }>(
+	({ editable = true }) => {
 		const list = useEntityList('plannables')
 		const options = useEntityListSubTree({entities: 'AtendeesGroup[schedule.id=$scheduleId]'})
 
@@ -87,15 +87,15 @@ const PlannablesEdit = Component(
 		if (list.isEmpty()) {
 			return (
 				<Stack direction="horizontal">
-					<Button onClick={() => createPlannables(1, true)}>Všechny skupiny</Button>
-					<Button onClick={() => createPlannables(2, true)}>Na půlky</Button>
-					<Button onClick={() => createPlannables(3, true)}>Na třetiny</Button>
-					<Button onClick={() => createPlannables(1, false)}>Instruktoři</Button>
+					<Button disabled={!editable} onClick={() => createPlannables(1, true)}>Všechny skupiny</Button>
+					<Button disabled={!editable} onClick={() => createPlannables(2, true)}>Na půlky</Button>
+					<Button disabled={!editable} onClick={() => createPlannables(3, true)}>Na třetiny</Button>
+					<Button disabled={!editable} onClick={() => createPlannables(1, false)}>Instruktoři</Button>
 				</Stack>
 			)
 		} else {
 			return (
-				<Repeater label={undefined} field="plannables" orderBy={undefined}>
+				<Repeater label={undefined} field="plannables" orderBy={undefined} enableAddingNew={editable} enableRemoving={editable}>
 					<MultiSelectField label="Skupiny" field="atendeeGroups" options="AtendeesGroup[schedule.id=$scheduleId].name" />
 					<CheckboxHasOne field="scheduled" label="Naplánované" create={(acc) => acc.getField('start').updateValue('')}>
 						<DateTimeField label="Začátek" field="start" />
@@ -151,10 +151,11 @@ interface SetFieldToValueButtonProps {
 	value: any
 	buttonProps?: Omit<ButtonProps, 'onClick'>
 	children?: React.ReactNode
+	disabled?: boolean
 }
 
 const SetFieldToValueButton = Component<SetFieldToValueButtonProps>(
-	({ field, value, buttonProps, children }) => {
+	({ field, value, buttonProps, children, disabled }) => {
 		const accessor = useField(field)
 		const onClick = React.useCallback(() => {
 			accessor.updateValue(value)
@@ -162,8 +163,9 @@ const SetFieldToValueButton = Component<SetFieldToValueButtonProps>(
 
 		return (
 			<Button
-				onClick={onClick}
+				onClick={disabled ? undefined : onClick}
 				{...buttonProps}
+				disabled={disabled}
 			>
 				{children ?? buttonProps?.children ?? value}
 			</Button>
@@ -175,19 +177,19 @@ const SetFieldToValueButton = Component<SetFieldToValueButtonProps>(
 	'SetFieldToValueButton',
 )
 
-export const TrayItemForm = Component(
-	() =>
+export const TrayItemForm = Component<{ editable?: boolean }>(
+	({ editable = true }) =>
 		(
 			<Stack direction="vertical">
-				<TextField label="Název*" field="title" />
-				<TextareaField label="Popis" field="description" />
+				<TextField label="Název*" field="title" disabled={!editable} />
+				<TextareaField label="Popis" field="description" disabled={!editable} />
 				<Stack direction="horizontal" align="end">
 					<Stack direction="vertical" grow>
-						<NumberField label="Délka (minuty)" field="duration" />
+						<NumberField label="Délka (minuty)" field="duration" disabled={!editable} />
 					</Stack>
 					<ButtonGroup>
 						{[10, 15, 30, 45, 60, 90].map(it => (
-							<SetFieldToValueButton key={it} field="duration" value={it} />
+							<SetFieldToValueButton key={it} field="duration" value={it} disabled={!editable} />
 						))}
 					</ButtonGroup>
 				</Stack>
@@ -208,10 +210,10 @@ export const TrayItemForm = Component(
 					orientation="horizontal"
 				/>
 				<MultiSelectField label="Garanti programu" field="owner" options="Person[schedule.id=$scheduleId].name" />
-				<TextareaField label="Poznámka" field="note" />
+				<TextareaField label="Poznámka" field="note" disabled={!editable} />
 
 				<FieldContainer useLabelElement={false} label="Výběr skupin">
-					<PlannablesEdit />
+					<PlannablesEdit editable={editable} />
 				</FieldContainer>
 			</Stack>
 		),

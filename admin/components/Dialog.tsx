@@ -7,9 +7,10 @@ export interface DialogProps {
 	onSubmit: () => void;
 	submitDisabled?: boolean;
 	children: React.ReactNode;
+	submitLabel?: string;
 }
 
-export const Dialog = memo<DialogProps>(({ onDismiss, onSubmit, children, submitDisabled = false }) => {
+export const Dialog = memo<DialogProps>(({ onDismiss, onSubmit, children, submitDisabled = false, submitLabel }) => {
 	const onBackdropClick = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
 		if (e.target === e.currentTarget) {
 			onDismiss();
@@ -35,7 +36,7 @@ export const Dialog = memo<DialogProps>(({ onDismiss, onSubmit, children, submit
 						onClick={onButtonClick}
 						disabled={submitDisabled}
 					>
-						Uložit
+						{submitLabel ?? 'Uložit'}
 					</Button>
 				</Stack>
 			</div>
