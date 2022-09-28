@@ -1,9 +1,10 @@
 import * as React from 'react'
-import { ApplicationEntrypoint, Pages, runReactApp } from '@contember/admin'
+import { Pages, runReactApp } from '@contember/admin'
 import '@contember/admin/style.css'
 import './style.css'
 import { Layout } from './components/Layout'
 import { csCZ } from '@contember/admin-i18n'
+import { ApplicationEntrypoint } from './components/ApplicationEntrypoint'
 
 const sessionTokenEnv = import.meta.env.VITE_CONTEMBER_ADMIN_SESSION_TOKEN
 const sessionToken = sessionTokenEnv === 'FROM_URL' ? (new URLSearchParams(window.location.search).get('token') ?? 'INVALID_TOKEN') : sessionTokenEnv
