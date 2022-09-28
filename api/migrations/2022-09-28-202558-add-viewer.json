@@ -1,0 +1,163 @@
+{
+	"formatVersion": 3,
+	"modifications": [
+		{
+			"modification": "patchAclSchema",
+			"patch": [
+				{
+					"op": "add",
+					"path": "/roles/scheduleViewer",
+					"value": {
+						"stages": "*",
+						"entities": {
+							"AtendeesGroup": {
+								"predicates": {
+									"schedule_id_schedule": {
+										"schedule": {
+											"id": "schedule"
+										}
+									}
+								},
+								"operations": {
+									"read": {
+										"schedule": "schedule_id_schedule",
+										"name": "schedule_id_schedule",
+										"regular": "schedule_id_schedule"
+									}
+								}
+							},
+							"Person": {
+								"predicates": {
+									"schedule_id_schedule": {
+										"schedule": {
+											"id": "schedule"
+										}
+									}
+								},
+								"operations": {
+									"read": {
+										"schedule": "schedule_id_schedule",
+										"name": "schedule_id_schedule"
+									}
+								}
+							},
+							"Plannable": {
+								"predicates": {
+									"trayItem_schedule_id_schedule": {
+										"trayItem": {
+											"schedule": {
+												"id": "schedule"
+											}
+										}
+									}
+								},
+								"operations": {
+									"read": {
+										"trayItem": "trayItem_schedule_id_schedule",
+										"atendeeGroups": "trayItem_schedule_id_schedule",
+										"scheduled": "trayItem_schedule_id_schedule"
+									}
+								}
+							},
+							"ProgrammeGroup": {
+								"predicates": {
+									"schedule_id_schedule": {
+										"schedule": {
+											"id": "schedule"
+										}
+									}
+								},
+								"operations": {
+									"read": {
+										"schedule": "schedule_id_schedule",
+										"name": "schedule_id_schedule",
+										"color": "schedule_id_schedule"
+									}
+								}
+							},
+							"Schedule": {
+								"predicates": {
+									"id_schedule": {
+										"id": "schedule"
+									}
+								},
+								"operations": {
+									"read": {
+										"workspace": "id_schedule",
+										"name": "id_schedule",
+										"startDate": "id_schedule",
+										"programmeGroups": "id_schedule",
+										"atendeesGroups": "id_schedule",
+										"people": "id_schedule",
+										"trayItems": "id_schedule"
+									}
+								}
+							},
+							"ScheduledItem": {
+								"predicates": {
+									"plannable_trayItem_schedule_i": {
+										"plannable": {
+											"trayItem": {
+												"schedule": {
+													"id": "schedule"
+												}
+											}
+										}
+									}
+								},
+								"operations": {
+									"read": {
+										"start": "plannable_trayItem_schedule_i",
+										"plannable": "plannable_trayItem_schedule_i"
+									}
+								}
+							},
+							"TrayItem": {
+								"predicates": {
+									"schedule_id_schedule": {
+										"schedule": {
+											"id": "schedule"
+										}
+									}
+								},
+								"operations": {
+									"read": {
+										"schedule": "schedule_id_schedule",
+										"title": "schedule_id_schedule",
+										"description": "schedule_id_schedule",
+										"duration": "schedule_id_schedule",
+										"programmeGroup": "schedule_id_schedule",
+										"owner": "schedule_id_schedule",
+										"note": "schedule_id_schedule",
+										"plannables": "schedule_id_schedule"
+									}
+								}
+							},
+							"Workspace": {
+								"predicates": {
+									"schedules_id_schedule": {
+										"schedules": {
+											"id": "schedule"
+										}
+									}
+								},
+								"operations": {
+									"read": {
+										"name": "schedules_id_schedule",
+										"schedules": "schedules_id_schedule"
+									}
+								}
+							}
+						},
+						"variables": {
+							"schedule": {
+								"type": "entity",
+								"entityName": "Schedule"
+							}
+						}
+					}
+				}
+			]
+		}
+	]
+}

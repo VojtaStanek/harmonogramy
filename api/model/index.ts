@@ -3,6 +3,10 @@ import {SchemaDefinition as def, AclDefinition as acl} from "@contember/schema-d
 export const workspaceAdminRole = acl.createRole('workspaceAdmin')
 export const workspaceAdminWorkspace = acl.createEntityVariable('workspace', 'Workspace', workspaceAdminRole)
 
+export const scheduleViewRole = acl.createRole('scheduleViewer')
+export const scheduleViewSchedule = acl.createEntityVariable('schedule', 'Schedule', scheduleViewRole)
+
+
 const allowAll = {
 	create: true,
 	read: true,
@@ -14,6 +18,10 @@ const allowAll = {
 	when: { id: workspaceAdminWorkspace },
 	...allowAll,
 })
+@acl.allow(scheduleViewRole, {
+	when: { schedules: acl.canRead('workspace') },
+	read: true,
+})
 export class Workspace {
 	name = def.stringColumn().notNull()
 	schedules = def.oneHasMany(Schedule, 'workspace')
@@ -22,6 +30,10 @@ export class Workspace {
 @acl.allow(workspaceAdminRole, {
 	when: { workspace: acl.canUpdate('name') },
 	...allowAll,
+})
+@acl.allow(scheduleViewRole, {
+	when: { id: scheduleViewSchedule },
+	read: true,
 })
 export class Schedule {
 	workspace = def.manyHasOne(Workspace, 'schedules').notNull().cascadeOnDelete()
@@ -37,6 +49,10 @@ export class Schedule {
 	when: { schedule: acl.canUpdate('name') },
 	...allowAll,
 })
+@acl.allow(scheduleViewRole, {
+	when: { schedule: acl.canRead('programmeGroups') },
+	read: true,
+})
 export class ProgrammeGroup {
 	schedule = def.manyHasOne(Schedule, 'programmeGroups').notNull().cascadeOnDelete()
 	name = def.stringColumn().notNull()
@@ -46,6 +62,10 @@ export class ProgrammeGroup {
 @acl.allow(workspaceAdminRole, {
 	when: { schedule: acl.canUpdate('name') },
 	...allowAll,
+})
+@acl.allow(scheduleViewRole, {
+	when: { schedule: acl.canRead('atendeesGroups') },
+	read: true,
 })
 export class AtendeesGroup {
 	schedule = def.manyHasOne(Schedule, 'atendeesGroups').notNull().cascadeOnDelete()
@@ -57,6 +77,10 @@ export class AtendeesGroup {
 	when: { schedule: acl.canUpdate('name') },
 	...allowAll,
 })
+@acl.allow(scheduleViewRole, {
+	when: { schedule: acl.canRead('people') },
+	read: true,
+})
 export class Person {
 	schedule = def.manyHasOne(Schedule, 'people').notNull().cascadeOnDelete()
 	name = def.stringColumn().notNull()
@@ -65,6 +89,10 @@ export class Person {
 @acl.allow(workspaceAdminRole, {
 	when: { schedule: acl.canUpdate('name') },
 	...allowAll,
+})
+@acl.allow(scheduleViewRole, {
+	when: { schedule: acl.canRead('trayItems') },
+	read: true,
 })
 export class TrayItem {
 	schedule = def.manyHasOne(Schedule, 'trayItems').notNull().cascadeOnDelete()
@@ -81,6 +109,10 @@ export class TrayItem {
 	when: { trayItem: acl.canUpdate('title') },
 	...allowAll,
 })
+@acl.allow(scheduleViewRole, {
+	when: { trayItem: acl.canRead('plannables') },
+	read: true,
+})
 export class Plannable {
 	trayItem = def.manyHasOne(TrayItem, 'plannables').notNull().cascadeOnDelete()
 	atendeeGroups = def.manyHasMany(AtendeesGroup)
@@ -90,6 +122,10 @@ export class Plannable {
 @acl.allow(workspaceAdminRole, {
 	when: { plannable: acl.canUpdate('scheduled') },
 	...allowAll,
+})
+@acl.allow(scheduleViewRole, {
+	when: { plannable: acl.canRead('scheduled') },
+	read: true,
 })
 export class ScheduledItem {
 	start = def.dateTimeColumn().notNull()
