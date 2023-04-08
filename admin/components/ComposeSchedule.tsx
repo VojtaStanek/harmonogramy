@@ -496,6 +496,9 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 
 		const onCopy = useCallback((id: EntityId, times: number) => {
 			const trayItem = Array.from(trayItems).find(it => it.getEntityList('plannables').hasEntityId(id))
+			if (!trayItem) {
+				return
+			}
 
 			for (let i = 0; i < times; i++) {
 				trayItems.createNewEntity((getAccessor, options) => {
