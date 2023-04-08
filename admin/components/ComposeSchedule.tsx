@@ -355,7 +355,7 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 				.filter((it): it is Temporal.PlainTime => it !== null)
 				.reduce((acc, time) => {
 					return Temporal.PlainTime.compare(acc, time) > 0 ? acc : time
-				}, Temporal.PlainTime.from('18:00'))
+				}, Temporal.PlainTime.from('20:00'))
 				.round({roundingIncrement: 30, smallestUnit: 'minutes'})
 			return [earliest, latest]
 		}, [segments])
