@@ -1,7 +1,9 @@
 import * as React from "react";
 import {useState} from "react";
 import {
-	Button, ButtonGroup, ButtonProps,
+	Button,
+	ButtonGroup,
+	ButtonProps,
 	Component,
 	DateTimeField,
 	Entity,
@@ -10,16 +12,18 @@ import {
 	FieldContainer,
 	HasOne,
 	MultiSelectField,
-	NumberField, RadioField,
+	NumberField,
+	RadioField,
 	Repeater,
-	SelectField,
 	Stack,
 	TextareaField,
 	TextField,
 	useEntity,
 	useEntityList,
-	useEntityListSubTree, useField
+	useEntityListSubTree,
+	useField
 } from "@contember/admin";
+import {ConnectOnCreate} from "./ConnectOnCreate";
 
 interface CheckboxHasOneField {
 	field: string
@@ -210,7 +214,15 @@ export const TrayItemForm = Component<{ editable?: boolean }>(
 					)}
 					orientation="horizontal"
 				/>
-				<MultiSelectField label="Garanti programu" field="owner" options="Person[schedule.id=$scheduleId].name" />
+				<MultiSelectField
+					label="Garanti programu"
+					field="owner"
+					options="Person[schedule.id=$scheduleId].name"
+					createNewForm={<>
+						<TextField label="Jméno" field="name" />
+						<ConnectOnCreate field="schedule" entityToConnect="Schedule[id=$scheduleId]" list={true} />
+					</>}
+				/>
 				<TextareaField label="Poznámka" field="note" disabled={!editable} />
 
 				<FieldContainer useLabelElement={false} label="Výběr skupin">
@@ -220,3 +232,4 @@ export const TrayItemForm = Component<{ editable?: boolean }>(
 		),
 	'TrayItemForm',
 )
+

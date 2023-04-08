@@ -206,9 +206,8 @@
 .scheduleTable__plannableTitle {
 	overflow: hidden;
 	max-height: 100%;
-	text-overflow: ellipsis;
 	white-space: nowrap;
-	margin: .2em .4em;
+	margin: .2em;
 }
 
 .scheduleTable__plannableExpansion {

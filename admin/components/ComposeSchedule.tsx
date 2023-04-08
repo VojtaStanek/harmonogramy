@@ -15,6 +15,7 @@ import classNames from "classnames";
 import {isTrayItemComplete, TrayItemForm} from "./trayItemForm";
 import {Dialog} from "./Dialog";
 import {isColorDark} from "../utils/isColorDark";
+import {maxTime, minTime} from "../utils/timeCompare";
 
 const LOCAL_TIMEZONE = Temporal.TimeZone.from('Europe/Prague');
 
@@ -335,29 +336,34 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 
 
 		const [earliestTime, latestTime] = useMemo(() => {
-			const earliest = segments
-				.flatMap((it): (Temporal.PlainTime | null)[] => [
-					it.start,
-					it.end,
-					it.end?.subtract(Temporal.Duration.from({minutes: 15})) ?? null,
-				])
-				.filter((it): it is Temporal.PlainTime => it !== null)
-				.reduce((acc, time) => {
-					return Temporal.PlainTime.compare(acc, time) < 0 ? acc : time
-				}, Temporal.PlainTime.from('08:00'))
-				.round({roundingIncrement: 30, smallestUnit: 'minutes', roundingMode: 'floor'})
+			const minSegmentShownDuration = Temporal.Duration.from({minutes: 60});
 
-			const latest = segments
-				.flatMap((it): (Temporal.PlainTime | null)[] => [
-					it.start,
-					it.start?.add(Temporal.Duration.from({minutes: 60})) ?? null,
-					it.end,
-				])
-				.filter((it): it is Temporal.PlainTime => it !== null)
-				.reduce((acc, time) => {
-					return Temporal.PlainTime.compare(acc, time) > 0 ? acc : time
-				}, Temporal.PlainTime.from('20:00'))
-				.round({roundingIncrement: 30, smallestUnit: 'minutes'})
+			const segmentStarts = segments.map(it => it.start).filter((it): it is Temporal.PlainTime => it !== null);
+			const segmentEnds = segments.map(it => it.end).filter((it): it is Temporal.PlainTime => it !== null);
+
+			const earliest = minTime(
+				Temporal.PlainTime.from('08:00'),
+				...segmentStarts,
+				...segmentEnds,
+				...segmentEnds.map((it) => it.subtract(minSegmentShownDuration)),
+				)
+				.round({roundingIncrement: 30, smallestUnit: 'minutes', roundingMode: 'trunc'})
+
+			const minLatest = Temporal.PlainTime.from('20:00');
+			const endOfDay = Temporal.PlainTime.from('23:59');
+			let latest = maxTime(
+				minLatest,
+				...segmentStarts,
+				...segmentEnds,
+				...segmentStarts.map((it) => it.add(minSegmentShownDuration))
+				)
+				.round({roundingIncrement: 30, smallestUnit: 'minutes', roundingMode: 'ceil'})
+
+			if (Temporal.PlainTime.compare(minLatest, latest) == 1 || Temporal.PlainTime.compare(latest, endOfDay.subtract(minSegmentShownDuration)) == 1) {
+				// Some segment has wrapped over
+				latest = endOfDay
+			}
+
 			return [earliest, latest]
 		}, [segments])
 
@@ -366,7 +372,7 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 		}, [earliestTime, latestTime])
 
 		const timeLabels = useMemo(() => {
-			const timeStep = widthScale > 2 ? 5 : widthScale >= 1.1 ? 15 : 30;
+			const timeStep = widthScale > 2.5 ? 5 : widthScale >= 1.1 ? 15 : 30;
 			const dayMinutes = dayLength.total({unit: 'minutes'})
 			const labels = []
 			for (let i = 0; i <= dayMinutes; i += timeStep) {
