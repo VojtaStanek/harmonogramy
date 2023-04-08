@@ -234,6 +234,7 @@ const DateLabels = memo<DateLabelsProps>(({ dates, atendeeGroups }) => {
 
 export const ComposeSchedule = Component<{ editable: boolean }>(
 	({ editable }) => {
+		const [widthScale, setWidthScale] = useState(1)
 		const startDateField = useField<string>('startDate')
 		const startDate = useMemo(() => {
 			return Temporal.Instant.from(startDateField.value!).toZonedDateTimeISO(LOCAL_TIMEZONE).toPlainDate()
@@ -365,13 +366,14 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 		}, [earliestTime, latestTime])
 
 		const timeLabels = useMemo(() => {
+			const timeStep = widthScale > 2 ? 5 : widthScale >= 1.1 ? 15 : 30;
 			const dayMinutes = dayLength.total({unit: 'minutes'})
 			const labels = []
-			for (let i = 0; i <= dayMinutes; i += 30) {
+			for (let i = 0; i <= dayMinutes; i += timeStep) {
 				labels.push(earliestTime.add({minutes: i}))
 			}
 			return labels
-		}, [earliestTime, dayLength])
+		}, [earliestTime, dayLength, widthScale])
 
 		const [hoveringPlannable, setHoveringPlannable] = useState<EntityId | null>(null)
 		const ref = useRef<HTMLDivElement>(null)
@@ -487,92 +489,102 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 
 		return (
 			<div className="schedulePage scheme-light">
-				<div
-					ref={ref}
-					className="scheduleTable"
-					style={{
-						'--groups-count': atendeeGroups.length,
-						'--days-count': dates.length,
-					} as any}
-					{...(editable ? {
-						onDragOver: onDragOver,
-						onDrop: onDrop,
-						onClick: onClickToCreate,
-					} : {})}
-				>
-					<div
-						className="scheduleTable__actions"
-					>
-						{editable && (
-							<>
-								<div>
-									<PersistButton size="small" flow="block" labelSave="Uložit" labelSaved="Uloženo" />
-								</div>
-								<LinkButton to="editSchedule(scheduleId:$request.scheduleId)" disabled={trayItems.hasUnpersistedChanges} distinction="outlined" size="small" flow="squarish"><Icon blueprintIcon="cog" /></LinkButton>
-							</>
-						)}
+				<div className="schedulePage__mainContent">
+					<div className="schedulePage__tableSegment">
+						<div
+							ref={ref}
+							className="scheduleTable"
+							style={{
+								'--groups-count': atendeeGroups.length,
+								'--days-count': dates.length,
+								'--width-scale': widthScale,
+							} as any}
+							{...(editable ? {
+								onDragOver: onDragOver,
+								onDrop: onDrop,
+								onClick: onClickToCreate,
+							} : {})}
+						>
+							<div
+								className="scheduleTable__actions"
+							>
+								{editable && (
+									<>
+										<div>
+											<PersistButton size="small" flow="block" labelSave="Uložit" labelSaved="Uloženo" />
+										</div>
+										<LinkButton to="editSchedule(scheduleId:$request.scheduleId)" disabled={trayItems.hasUnpersistedChanges} distinction="outlined" size="small" flow="squarish"><Icon blueprintIcon="cog" /></LinkButton>
+									</>
+								)}
+							</div>
+
+							<DateLabels dates={dates} atendeeGroups={atendeeGroups} />
+
+							<TimeLabels
+								earliestTime={earliestTime}
+								timeLabels={timeLabels}
+								dayLength={dayLength}
+							/>
+
+							{[...segments].map((segment, index) => (
+								<SegmentBox
+									key={index}
+									segment={segment}
+									trayItem={plannableToTrayItem.get(segment.plannable)!}
+									earliestTime={earliestTime}
+									latestTime={latestTime}
+									isHovering={hoveringPlannable === segment.plannable.id}
+									isDragged={draggingPlannable?.id === segment.plannable.id}
+									setHovering={isHovering => setHoveringPlannable(isHovering ? segment.plannable.id : null)}
+									dayIndex={dates.findIndex(it => it.equals(segment.date))}
+									onDragStart={(widthRatio) => {
+										setDraggingPlannable({ id: segment.plannable.id, widthRatio })
+									}}
+									onDragEnd={() => {
+										setDraggingPlannable(null)
+										setDraggingPlannableStart(null)
+									}}
+									onClick={() => {
+										setEditingTrayItem(plannableToTrayItem.get(segment.plannable)!.id)
+									}}
+									editable={editable}
+								/>
+							))}
+
+							{...shadowSegments.map((segment, index) => (
+								<SegmentBox
+									key={index}
+									segment={segment}
+									trayItem={plannableToTrayItem.get(segment.plannable)!}
+									earliestTime={earliestTime}
+									latestTime={latestTime}
+									isHovering={hoveringPlannable === segment.plannable.id}
+									setHovering={isHovering => setHoveringPlannable(isHovering ? segment.plannable.id : null)}
+									dayIndex={dates.findIndex(it => it.equals(segment.date))}
+									onDragStart={(widthRatio) => {
+										setDraggingPlannable({
+											id: segment.plannable.id,
+											widthRatio,
+										})
+									}}
+									onDragEnd={() => {
+										setDraggingPlannable(null)
+										setDraggingPlannableStart(null)
+									}}
+									onClick={() => {
+										setEditingTrayItem(plannableToTrayItem.get(segment.plannable)!.id)
+									}}
+									editable={editable}
+								/>
+							))}
+						</div>
 					</div>
-
-					<DateLabels dates={dates} atendeeGroups={atendeeGroups} />
-
-					<TimeLabels
-						earliestTime={earliestTime}
-						timeLabels={timeLabels}
-						dayLength={dayLength}
-					/>
-
-					{[...segments].map((segment, index) => (
-						<SegmentBox
-							key={index}
-							segment={segment}
-							trayItem={plannableToTrayItem.get(segment.plannable)!}
-							earliestTime={earliestTime}
-							latestTime={latestTime}
-							isHovering={hoveringPlannable === segment.plannable.id}
-							isDragged={draggingPlannable?.id === segment.plannable.id}
-							setHovering={isHovering => setHoveringPlannable(isHovering ? segment.plannable.id : null)}
-							dayIndex={dates.findIndex(it => it.equals(segment.date))}
-							onDragStart={(widthRatio) => {
-								setDraggingPlannable({ id: segment.plannable.id, widthRatio })
-							}}
-							onDragEnd={() => {
-								setDraggingPlannable(null)
-								setDraggingPlannableStart(null)
-							}}
-							onClick={() => {
-								setEditingTrayItem(plannableToTrayItem.get(segment.plannable)!.id)
-							}}
-							editable={editable}
-						/>
-					))}
-
-					{...shadowSegments.map((segment, index) => (
-						<SegmentBox
-							key={index}
-							segment={segment}
-							trayItem={plannableToTrayItem.get(segment.plannable)!}
-							earliestTime={earliestTime}
-							latestTime={latestTime}
-							isHovering={hoveringPlannable === segment.plannable.id}
-							setHovering={isHovering => setHoveringPlannable(isHovering ? segment.plannable.id : null)}
-							dayIndex={dates.findIndex(it => it.equals(segment.date))}
-							onDragStart={(widthRatio) => {
-								setDraggingPlannable({
-									id: segment.plannable.id,
-									widthRatio,
-								})
-							}}
-							onDragEnd={() => {
-								setDraggingPlannable(null)
-								setDraggingPlannableStart(null)
-							}}
-							onClick={() => {
-								setEditingTrayItem(plannableToTrayItem.get(segment.plannable)!.id)
-							}}
-							editable={editable}
-						/>
-					))}
+					<div className="schedulePage__bottomControls">
+						🔎
+						<input type="range" min={1} max={3} step={0.1} value={widthScale} onChange={(e) => setWidthScale(parseFloat(e.target.value))} />
+					</div>
 				</div>
+
 
 
 				{editable && (
