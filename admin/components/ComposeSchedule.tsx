@@ -53,11 +53,12 @@ interface SegmentBoxProps {
 	onDragStart: (ratio: number) => void;
 	onDragEnd: () => void;
 	onClick: () => void;
+	onContextMenu?: (x: number, y: number) => void;
 	editable: boolean;
 }
 
 const SegmentBox = memo<SegmentBoxProps>(
-	({ segment, trayItem, earliestTime, latestTime, isHovering, isDragged = false, setHovering, dayIndex, onDragStart, onDragEnd, onClick, editable }) => {
+	({ segment, trayItem, earliestTime, latestTime, isHovering, isDragged = false, setHovering, dayIndex, onDragStart, onDragEnd, onClick, onContextMenu, editable }) => {
 		const plannable = segment.plannable
 		const dayLength = earliestTime.until(latestTime)
 		const setStartTime = segment.start ?? earliestTime
@@ -123,11 +124,15 @@ const SegmentBox = memo<SegmentBoxProps>(
 					},
 				} : {})}
 
-
 				onClick={(e) => {
 					e.stopPropagation()
 					onClick()
 				}}
+				onContextMenu={onContextMenu ? e => {
+					e.preventDefault()
+					e.stopPropagation()
+					onContextMenu?.(e.clientX, e.clientY)
+				} : undefined}
 			>
 				<div
 					className="scheduleTable__plannableTitle"
@@ -236,6 +241,7 @@ const DateLabels = memo<DateLabelsProps>(({ dates, atendeeGroups }) => {
 export const ComposeSchedule = Component<{ editable: boolean }>(
 	({ editable }) => {
 		const [widthScale, setWidthScale] = useState(1)
+		const [contextMenu, setContextMenu] = useState<null | {x: number, y: number, id: EntityId}>(null)
 		const startDateField = useField<string>('startDate')
 		const startDate = useMemo(() => {
 			return Temporal.Instant.from(startDateField.value!).toZonedDateTimeISO(LOCAL_TIMEZONE).toPlainDate()
@@ -490,6 +496,37 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 			}
 		}, [createStartTime, trayItems])
 
+		const onCopy = useCallback((id: EntityId, times: number) => {
+			const trayItem = Array.from(trayItems).find(it => it.getEntityList('plannables').hasEntityId(id))
+
+			for (let i = 0; i < times; i++) {
+				trayItems.createNewEntity((getAccessor, options) => {
+					getAccessor().getField('title').updateValue(trayItem.getField('title').value)
+					getAccessor().getField('description').updateValue(trayItem.getField('description').value)
+					getAccessor().getField('duration').updateValue(trayItem.getField('duration').value)
+					getAccessor().connectEntityAtField('programmeGroup', trayItem.getEntity('programmeGroup'))
+					for (const owner of trayItem.getEntityList('owner')) {
+						getAccessor().getEntityList('owner').connectEntity(owner)
+					}
+					getAccessor().getField('note').updateValue(trayItem.getField('note').value)
+					for (const plannable of trayItem.getEntityList('plannables')) {
+						getAccessor().getEntityList('plannables').createNewEntity((getPlannable, options) => {
+							for (const group of plannable.getEntityList('atendeeGroups')) {
+								getPlannable().getEntityList('atendeeGroups').connectEntity(group)
+							}
+							const start = plannable.getField<string>('scheduled.start').value
+							if (start) {
+								const originalStart = Temporal.Instant.from(start).toZonedDateTimeISO(LOCAL_TIMEZONE).toPlainDateTime()
+								const newStart = originalStart.add({ days: i + 1 }).toZonedDateTime(LOCAL_TIMEZONE);
+								getPlannable().getField('scheduled.start').updateValue(newStart.toInstant().toString())
+							}
+						})
+					}
+					getAccessor().connectEntityAtField('programmeGroup', trayItem.getEntity('programmeGroup'))
+				})
+			}
+		}, [trayItems])
+
 
 		const [editingTrayItem, setEditingTrayItem] = useState<EntityId | null>(null)
 
@@ -552,6 +589,13 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 									}}
 									onClick={() => {
 										setEditingTrayItem(plannableToTrayItem.get(segment.plannable)!.id)
+									}}
+									onContextMenu={(x, y) => {
+										setContextMenu({
+											x,
+											y,
+											id: segment.plannable.id,
+										})
 									}}
 									editable={editable}
 								/>
@@ -659,6 +703,27 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 							<TrayItemForm editable={editable} />
 						</Entity>
 					</Dialog>
+				)}
+
+				{contextMenu && (
+					<div className="contextMenu__wrapper" onClick={() => {
+						setContextMenu(null)
+					}}>
+						<div
+							className="contextMenu"
+							style={{
+								'--position-x': `${contextMenu.x}px`,
+								'--position-y': `${contextMenu.y}px`,
+							} as any}
+						>
+							<div className="contextMenu__item" onClick={() => {
+								setContextMenu(null)
+								onCopy(contextMenu.id, 1)
+							}}>
+								Opakovat další den
+							</div>
+						</div>
+					</div>
 				)}
 			</div>
 		)

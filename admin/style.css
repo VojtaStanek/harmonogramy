@@ -260,3 +260,36 @@
 	width: 600px;
 	max-width: calc(100vw - 2em);
 }
+
+.contextMenu__wrapper {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1;
+}
+
+.contextMenu {
+	position: fixed;
+	top: var(--position-y);
+	left: var(--position-x);
+	background: white;
+	display: flex;
+	flex-direction: column;
+	min-width: 10em;
+	padding: .1em;
+	gap: .1em;
+	border-radius: .1em;
+	align-items: stretch;
+	border: 1px solid #aaa;
+}
+
+.contextMenu__item {
+	padding: 0.2em 0.5em;
+}
+
+.contextMenu__item:hover {
+	background: #eee;
+	cursor: pointer;
+}
