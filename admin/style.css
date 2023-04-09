@@ -184,6 +184,7 @@
 	position: relative;
 	left: calc(var(--segment-start) * 100%);
 	margin: 0 0 1px 1px;
+	overflow: hidden;
 }
 
 .scheduleTable__plannable, .scheduleTable__plannableExpansion {
@@ -231,7 +232,7 @@
 	overflow: hidden;
 	max-height: 100%;
 	white-space: nowrap;
-	font-size: .9em;
+	font-size: .7em;
 	flex: 0 0 auto;
 }
 
@@ -239,7 +240,7 @@
 	overflow: hidden;
 	max-height: 100%;
 	white-space: nowrap;
-	font-size: .6em;
+	font-size: .5em;
 	padding: .1em .5em;
 	background: #ccc7;
 	border-radius: 1em;
@@ -258,6 +259,14 @@
 	border-radius: 0.5em;
 	border-bottom-left-radius: 0;
 	box-shadow: 0 0.25em 0.5em 0 rgba(0, 0, 0, 0.6);
+}
+
+
+.scheduleTable__plannableExpansion .scheduleTable__plannableTitle {
+	font-size: 1rem;
+}
+.scheduleTable__plannableExpansion .scheduleTable__plannableOwners {
+	font-size: .7rem;
 }
 
 .scheduleTable__plannable--dark {
