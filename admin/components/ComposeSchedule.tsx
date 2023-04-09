@@ -41,14 +41,25 @@ function groupNeighbours(_items: number[]): number[][] {
 	return result;
 }
 
+type HoverStatus = null | {
+	clientX: number,
+	clientY: number,
+}
+
+type HoverStatusExtended = null | {
+	clientX: number,
+	clientY: number,
+	id: EntityId,
+}
+
 interface SegmentBoxProps {
 	segment: Segment;
 	trayItem: EntityAccessor;
 	earliestTime: Temporal.PlainTime;
 	latestTime: Temporal.PlainTime;
-	isHovering: boolean;
+	isHovering: HoverStatus;
 	isDragged?: boolean;
-	setHovering: (isHovering: boolean) => void;
+	setHovering: (isHovering: HoverStatus) => void;
 	dayIndex: number;
 	onDragStart: (ratio: number) => void;
 	onDragEnd: () => void;
@@ -77,13 +88,12 @@ const SegmentBox = memo<SegmentBoxProps>(
 
 		const color = trayItem.getField<string>('programmeGroup.color').value;
 		const isDark = color !== null && isColorDark(color);
-
 		const ownerNames = Array.from(trayItem.getEntityList('owner')).map(it => it.getField('name').value).join(', ');
 		return (
 			<div
 				className={classNames(
 					'scheduleTable__plannable',
-					isHovering && 'scheduleTable__plannable--hovering',
+					isHovering != null && 'scheduleTable__plannable--hovering',
 					isDragged && 'scheduleTable__plannable--dragged',
 					(segment.start?.equals(startTime)) && 'scheduleTable__plannable--start',
 					(segment.end?.equals(endTime)) && 'scheduleTable__plannable--end',
@@ -99,11 +109,11 @@ const SegmentBox = memo<SegmentBoxProps>(
 				} as any}
 
 				{...(editable ? {
-					onMouseEnter: () => setHovering(true),
-					onMouseLeave: () => setHovering(false),
+					onMouseEnter: (e) => setHovering({clientX: e.clientX, clientY: e.clientY}),
+					onMouseMove: (e) => setHovering({clientX: e.clientX, clientY: e.clientY}),
+					onMouseLeave: () => setHovering(null),
 					draggable: true,
 					onDragStart: (e) => {
-						console.log(e.nativeEvent)
 						e.dataTransfer.setData(MIME_TYPE, plannable.id as string)
 						e.dataTransfer.effectAllowed = "move"
 
@@ -141,7 +151,24 @@ const SegmentBox = memo<SegmentBoxProps>(
 					{trayItem.getField('title').value}
 				</div>
 				{ownerNames && <div className="scheduleTable__plannableOwners">{ownerNames}</div>}
-
+				{(isHovering != null && !isDragged) && (
+					<div
+						className="scheduleTable__plannableExpansion"
+						style={{
+							'--position-x': `${isHovering.clientX}px`,
+							'--position-y': `${isHovering.clientY}px`,
+						} as any}
+					>
+						<div
+							className="scheduleTable__plannableTitle"
+						>
+							{trayItem.getField('title').value}
+						</div>
+						<div className="scheduleTable__plannableOwners">{trayItem.getField('programmeGroup.name').value}</div>
+						{ownerNames && <div className="scheduleTable__plannableOwners">{ownerNames}</div>}
+						<div className="scheduleTable__plannableOwners">{duration.total({unit: 'minute'})} min</div>
+					</div>
+				)}
 			</div>
 		);
 	},
@@ -381,7 +408,7 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 			return labels
 		}, [earliestTime, dayLength, widthScale])
 
-		const [hoveringPlannable, setHoveringPlannable] = useState<EntityId | null>(null)
+		const [hoveringPlannable, setHoveringPlannable] = useState<HoverStatusExtended>(null)
 		const ref = useRef<HTMLDivElement>(null)
 
 		const getDateTimeForPosition = useCallback(([clientX, clientY]: [number, number], minutesOffset: number = 0): Temporal.PlainDateTime | null => {
@@ -571,9 +598,9 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 									trayItem={plannableToTrayItem.get(segment.plannable)!}
 									earliestTime={earliestTime}
 									latestTime={latestTime}
-									isHovering={hoveringPlannable === segment.plannable.id}
+									isHovering={hoveringPlannable?.id === segment.plannable.id ? hoveringPlannable : null}
 									isDragged={draggingPlannable?.id === segment.plannable.id}
-									setHovering={isHovering => setHoveringPlannable(isHovering ? segment.plannable.id : null)}
+									setHovering={isHovering => setHoveringPlannable(isHovering ? {...isHovering, id: segment.plannable.id} : null)}
 									dayIndex={dates.findIndex(it => it.equals(segment.date))}
 									onDragStart={(widthRatio) => {
 										setDraggingPlannable({ id: segment.plannable.id, widthRatio })
@@ -603,8 +630,8 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 									trayItem={plannableToTrayItem.get(segment.plannable)!}
 									earliestTime={earliestTime}
 									latestTime={latestTime}
-									isHovering={hoveringPlannable === segment.plannable.id}
-									setHovering={isHovering => setHoveringPlannable(isHovering ? segment.plannable.id : null)}
+									isHovering={null}
+									setHovering={isHovering => {}}
 									dayIndex={dates.findIndex(it => it.equals(segment.date))}
 									onDragStart={(widthRatio) => {
 										setDraggingPlannable({

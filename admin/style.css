@@ -184,12 +184,15 @@
 	position: relative;
 	left: calc(var(--segment-start) * 100%);
 	margin: 0 0 1px 1px;
-	background: var(--segment-color, white);
+}
+
+.scheduleTable__plannable, .scheduleTable__plannableExpansion {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	padding: .2em .3em;
 	justify-content: flex-start;
+	background: var(--segment-color, white);
 }
 
 .scheduleTable__plannable--start {
@@ -202,7 +205,7 @@
 	border-bottom-right-radius: 0.5em;
 }
 
-.scheduleTable__plannable::after {
+.scheduleTable__plannable::after, .scheduleTable__plannableExpansion::after {
 	content: "";
 	position: absolute;
 	top: 0;
@@ -220,7 +223,7 @@
 	opacity: .5;
 }
 
-.scheduleTable__plannable--hovering::after {
+.scheduleTable__plannable--hovering::after, .scheduleTable__plannableExpansion::after {
 	opacity: 1;
 }
 
@@ -241,28 +244,19 @@
 	background: #ccc7;
 	border-radius: 1em;
 	max-width: 100%;
+	margin-bottom: 2px;
 }
 
 .scheduleTable__plannableExpansion {
-	visibility: hidden;
-	opacity: 0;
-	transition: opacity 300ms;
-}
-
-.scheduleTable__plannable:hover .scheduleTable__plannableExpansion {
-	visibility: visible;
-	position: absolute;
-	top: 1em;
-	left: 1em;
-	width: auto;
-	height: auto;
-	border: 1px solid var(--segment-color, white);
-	background: white;
+	position: fixed;
+	left: var(--position-x);
+	bottom: calc(100vh - var(--position-y));
 	z-index: 1;
-	opacity: 1;
-	white-space: nowrap;
 	padding: .5em;
+	color: black;
+	background: white;
 	border-radius: 0.5em;
+	border-bottom-left-radius: 0;
 	box-shadow: 0 0.25em 0.5em 0 rgba(0, 0, 0, 0.6);
 }
 
