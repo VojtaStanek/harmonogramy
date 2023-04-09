@@ -185,6 +185,11 @@
 	left: calc(var(--segment-start) * 100%);
 	margin: 0 0 1px 1px;
 	background: var(--segment-color, white);
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	padding: .2em .3em;
+	justify-content: flex-start;
 }
 
 .scheduleTable__plannable--start {
@@ -204,12 +209,9 @@
 	left: 0;
 	width: 100%;
 	height: 100%;
-	/*box-shadow: 0 0.25em 0.5em 0 rgba(0, 0, 0, 0.6);*/
 	border-radius: inherit;
 	opacity: 0;
 	transition: opacity 0.5s;
-	/*outline: 3px solid var(--segment-color, white);*/
-	/*filter: brightness(0.5);*/
 	filter: brightness(0.5);
 	border: 2px solid var(--segment-color, white);
 }
@@ -226,7 +228,19 @@
 	overflow: hidden;
 	max-height: 100%;
 	white-space: nowrap;
-	margin: .2em;
+	font-size: .9em;
+	flex: 0 0 auto;
+}
+
+.scheduleTable__plannableOwners {
+	overflow: hidden;
+	max-height: 100%;
+	white-space: nowrap;
+	font-size: .6em;
+	padding: .1em .5em;
+	background: #ccc7;
+	border-radius: 1em;
+	max-width: 100%;
 }
 
 .scheduleTable__plannableExpansion {

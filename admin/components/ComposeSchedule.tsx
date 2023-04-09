@@ -78,6 +78,7 @@ const SegmentBox = memo<SegmentBoxProps>(
 		const color = trayItem.getField<string>('programmeGroup.color').value;
 		const isDark = color !== null && isColorDark(color);
 
+		const ownerNames = Array.from(trayItem.getEntityList('owner')).map(it => it.getField('name').value).join(', ');
 		return (
 			<div
 				className={classNames(
@@ -136,17 +137,10 @@ const SegmentBox = memo<SegmentBoxProps>(
 			>
 				<div
 					className="scheduleTable__plannableTitle"
-					aria-hidden={true}
 				>
 					{trayItem.getField('title').value}
 				</div>
-				{/*<div*/}
-				{/*	className="scheduleTable__plannableExpansion"*/}
-				{/*>*/}
-				{/*	{trayItem.getField('title').value}*/}
-				{/*	<br />*/}
-				{/*	{trayItem.getField('programmeGroup.name').value}*/}
-				{/*</div>*/}
+				{ownerNames && <div className="scheduleTable__plannableOwners">{ownerNames}</div>}
 
 			</div>
 		);
