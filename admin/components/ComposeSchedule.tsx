@@ -113,10 +113,11 @@ const SegmentBox = memo<SegmentBoxProps>(
 					'--segment-color': color,
 				} as any}
 
+				onMouseEnter={(e) => setHovering({clientX: e.clientX, clientY: e.clientY})}
+				onMouseMove={(e) => setHovering({clientX: e.clientX, clientY: e.clientY})}
+				onMouseLeave={() => setHovering(null)}
+
 				{...(editable ? {
-					onMouseEnter: (e) => setHovering({clientX: e.clientX, clientY: e.clientY}),
-					onMouseMove: (e) => setHovering({clientX: e.clientX, clientY: e.clientY}),
-					onMouseLeave: () => setHovering(null),
 					draggable: true,
 					onDragStart: (e) => {
 						e.dataTransfer.setData(MIME_TYPE, plannable.id as string)
@@ -665,7 +666,7 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 										onClick={() => {
 											setEditingTrayItem(trayItem.id)
 										}}
-										onContextMenu={(x, y) => {
+										onContextMenu={!editable ? undefined : (x, y) => {
 											setContextMenu({
 												x,
 												y,
