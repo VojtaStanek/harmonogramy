@@ -419,7 +419,7 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 				const rect = dayEl.getBoundingClientRect()
 				if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
 					const day = Temporal.PlainDate.from(dayEl.getAttribute('data-date')!)
-					const alignTo = rect.width > 2000 ? 1 : 5
+					const alignTo = rect.width > 3000 ? 1 : 5
 					const relativeX = (clientX - rect.left) / rect.width
 
 					const time = earliestTime.add({minutes: Math.floor(relativeX * dayLength.total({unit: 'minutes'}) - minutesOffset)}).round({
