@@ -68,10 +68,11 @@ interface SegmentBoxProps {
 	onClick: () => void;
 	onContextMenu?: (x: number, y: number) => void;
 	editable: boolean;
+	isHighlighted: boolean | null;
 }
 
 const SegmentBox = memo<SegmentBoxProps>(
-	({ segment, trayItem, earliestTime, latestTime, isHovering, isDragged = false, setHovering, dayIndex, onDragStart, onDragEnd, onClick, onContextMenu, editable }) => {
+	({ segment, trayItem, earliestTime, latestTime, isHovering, isDragged = false, setHovering, dayIndex, onDragStart, onDragEnd, onClick, onContextMenu, editable, isHighlighted }) => {
 		const plannable = segment.plannable
 		const dayLength = earliestTime.until(latestTime)
 		const setStartTime = segment.start ?? earliestTime
@@ -100,6 +101,8 @@ const SegmentBox = memo<SegmentBoxProps>(
 					(segment.start?.equals(startTime)) && 'scheduleTable__plannable--start',
 					(segment.end?.equals(endTime)) && 'scheduleTable__plannable--end',
 					isDark && 'scheduleTable__plannable--dark',
+					isHighlighted && 'scheduleTable__plannable--highlighted',
+					isHighlighted === false && 'scheduleTable__plannable--notHighlighted',
 				)}
 				style={{
 					'--segment-day': dayIndex,
@@ -322,6 +325,24 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 		const sortedAttendeGroupIds = useMemo(() => {
 			return atendeeGroups.map(it => it.id)
 		}, [atendeeGroups])
+
+		// Owner filtering
+		const [ownerFilter, setOwnerFilter] = useState<EntityId | null>(null)
+		const availableOwners = useMemo(() => {
+			const result: {id: EntityId, name: string, count: number}[] = []
+			for (const trayItem of trayItems) {
+				for (const owner of trayItem.getEntityList('owner')) {
+					let ownerRecord = result.find(it => it.id === owner.id);
+					if (!ownerRecord) {
+						ownerRecord = {id: owner.id, name: owner.getField<string>('name').value!, count: 0}
+						result.push(ownerRecord)
+					}
+					ownerRecord!.count++
+				}
+			}
+			result.sort((a, b) => a.name.localeCompare(b.name))
+			return result
+		}, [trayItems])
 
 		const createSegmentsForPlannable = useCallback((plannable: EntityAccessor, opts?: { start?: Temporal.PlainDateTime }): Segment[] => {
 			const trayItem = plannableToTrayItem.get(plannable)!
@@ -618,37 +639,44 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 								dayLength={dayLength}
 							/>
 
-							{[...segments].map((segment, index) => (
-								<SegmentBox
-									key={index}
-									segment={segment}
-									trayItem={plannableToTrayItem.get(segment.plannable)!}
-									earliestTime={earliestTime}
-									latestTime={latestTime}
-									isHovering={hoveringPlannable?.id === segment.plannable.id ? hoveringPlannable : null}
-									isDragged={draggingPlannable?.id === segment.plannable.id}
-									setHovering={isHovering => setHoveringPlannable(isHovering ? {...isHovering, id: segment.plannable.id} : null)}
-									dayIndex={dates.findIndex(it => it.equals(segment.date))}
-									onDragStart={(widthRatio) => {
-										setDraggingPlannable({ id: segment.plannable.id, widthRatio })
-									}}
-									onDragEnd={() => {
-										setDraggingPlannable(null)
-										setDraggingPlannableStart(null)
-									}}
-									onClick={() => {
-										setEditingTrayItem(plannableToTrayItem.get(segment.plannable)!.id)
-									}}
-									onContextMenu={(x, y) => {
-										setContextMenu({
-											x,
-											y,
-											id: segment.plannable.id,
-										})
-									}}
-									editable={editable}
-								/>
-							))}
+							{[...segments].map((segment, index) => {
+								const trayItem = plannableToTrayItem.get(segment.plannable)!;
+								return (
+									<SegmentBox
+										key={index}
+										segment={segment}
+										trayItem={trayItem}
+										earliestTime={earliestTime}
+										latestTime={latestTime}
+										isHovering={hoveringPlannable?.id === segment.plannable.id ? hoveringPlannable : null}
+										isDragged={draggingPlannable?.id === segment.plannable.id}
+										setHovering={isHovering => setHoveringPlannable(isHovering ? {
+											...isHovering,
+											id: segment.plannable.id
+										} : null)}
+										dayIndex={dates.findIndex(it => it.equals(segment.date))}
+										onDragStart={(widthRatio) => {
+											setDraggingPlannable({id: segment.plannable.id, widthRatio})
+										}}
+										onDragEnd={() => {
+											setDraggingPlannable(null)
+											setDraggingPlannableStart(null)
+										}}
+										onClick={() => {
+											setEditingTrayItem(trayItem.id)
+										}}
+										onContextMenu={(x, y) => {
+											setContextMenu({
+												x,
+												y,
+												id: segment.plannable.id,
+											})
+										}}
+										editable={editable}
+										isHighlighted={ownerFilter ? trayItem.getEntityList('owner').hasEntityId(ownerFilter) : null}
+									/>
+								);
+							})}
 
 							{...shadowSegments.map((segment, index) => (
 								<SegmentBox
@@ -674,13 +702,30 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 										setEditingTrayItem(plannableToTrayItem.get(segment.plannable)!.id)
 									}}
 									editable={editable}
+									isHighlighted={null}
 								/>
 							))}
 						</div>
 					</div>
 					<div className="schedulePage__bottomControls">
-						🔎
-						<input type="range" min={1} max={3} step={0.1} value={widthScale} onChange={(e) => setWidthScale(parseFloat(e.target.value))} />
+						<div className="schedulePage__bottomControlsLeft">
+							<label>
+								Majitel programu:{' '}
+								<select value={ownerFilter ?? ''} onChange={(e) => setOwnerFilter(e.target.value)}>
+									<option value="">Všichni</option>
+									{availableOwners.map(it => (
+										<option key={it.id} value={it.id}>{it.name} ({it.count})</option>
+									))}
+								</select>
+							</label>
+						</div>
+
+						<div className="schedulePage__bottomControlsRight">
+							<label>
+								🔎
+								<input type="range" min={1} max={3} step={0.1} value={widthScale} onChange={(e) => setWidthScale(parseFloat(e.target.value))} />
+							</label>
+						</div>
 					</div>
 				</div>
 
