@@ -16,6 +16,7 @@ import {isTrayItemComplete, TrayItemForm} from "./trayItemForm";
 import {Dialog} from "./Dialog";
 import {isColorDark} from "../utils/isColorDark";
 import {maxTime, minTime} from "../utils/timeCompare";
+import {usePreventLeavingWithUnsavedChanges} from "../utils/usePreventLeavingWithUnsavedChanges";
 
 const LOCAL_TIMEZONE = Temporal.TimeZone.from('Europe/Prague');
 
@@ -261,6 +262,7 @@ const DateLabels = memo<DateLabelsProps>(({ dates, atendeeGroups }) => {
 
 export const ComposeSchedule = Component<{ editable: boolean }>(
 	({ editable }) => {
+		usePreventLeavingWithUnsavedChanges()
 		const [widthScale, setWidthScale] = useState(1)
 		const [contextMenu, setContextMenu] = useState<null | {x: number, y: number, id: EntityId}>(null)
 		const startDateField = useField<string>('startDate')
@@ -578,7 +580,11 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 										<div>
 											<PersistButton size="small" flow="block" labelSave="Uložit" labelSaved="Uloženo" />
 										</div>
-										<LinkButton to="editSchedule(scheduleId:$request.scheduleId)" disabled={trayItems.hasUnpersistedChanges} distinction="outlined" size="small" flow="squarish"><Icon blueprintIcon="cog" /></LinkButton>
+										{trayItems.hasUnpersistedChanges ? (
+											<Button disabled={true} distinction="outlined" size="small" flow="squarish"><Icon blueprintIcon="cog" /></Button>
+										) : (
+											<LinkButton to="editSchedule(scheduleId:$request.scheduleId)" distinction="outlined" size="small" flow="squarish"><Icon blueprintIcon="cog" /></LinkButton>
+										)}
 									</>
 								)}
 							</div>
