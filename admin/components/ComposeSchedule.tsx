@@ -2,10 +2,10 @@ import {
 	Button,
 	Component, Entity,
 	EntityAccessor,
-	EntityId,
+	EntityId, EntityListSubTree,
 	Field,
 	HasMany,
-	HasOne, Icon, LinkButton, PersistButton, useEntityList,
+	HasOne, Icon, LinkButton, PersistButton, useEntityList, useEntityListSubTree,
 	useField
 } from "@contember/admin";
 import * as React from "react";
@@ -17,6 +17,7 @@ import {Dialog} from "./Dialog";
 import {isColorDark} from "../utils/isColorDark";
 import {maxTime, minTime} from "../utils/timeCompare";
 import {usePreventLeavingWithUnsavedChanges} from "../utils/usePreventLeavingWithUnsavedChanges";
+import {FastBlockCreate, FastBlockCreateOnSubmit} from "./FastBlockCreate";
 
 const LOCAL_TIMEZONE = Temporal.TimeZone.from('Europe/Prague');
 
@@ -517,6 +518,25 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 			}
 		}, [createStartTime, trayItems])
 
+		const onFastCreateSave: FastBlockCreateOnSubmit = useCallback((values) => {
+				if (createStartTime !== null) {
+					const [time, id] = createStartTime
+					const entity = trayItems.getChildEntityById(id)
+					entity.getField('title').updateValue(values.name)
+					entity.connectEntityAtField('programmeGroup', values.group)
+					entity.getField('duration').updateValue(values.duration)
+					const startValue = time?.toZonedDateTime(LOCAL_TIMEZONE).toInstant().toString() ?? null;
+					entity.getEntityList('plannables').createNewEntity((getAccessor, options) => {
+						getAccessor().getField('scheduled.start').updateValue(startValue)
+						const regularAttendeeGroups = Array.from(atendeesGroupsAccessor).filter(it => it.getField('regular').value)
+						for (const attendeeGroup of regularAttendeeGroups) {
+							getAccessor().getEntityList('atendeeGroups').connectEntity(attendeeGroup)
+						}
+					})
+					setCreateStartTime(null)
+				}
+		}, [createStartTime, trayItems, atendeesGroupsAccessor])
+
 		const onCopy = useCallback((id: EntityId, times: number) => {
 			const trayItem = Array.from(trayItems).find(it => it.getEntityList('plannables').hasEntityId(id))
 			if (!trayItem) {
@@ -553,6 +573,7 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 
 
 		const [editingTrayItem, setEditingTrayItem] = useState<EntityId | null>(null)
+		const programmeGroups = useEntityListSubTree("programmeGroup")
 
 		return (
 			<div className="schedulePage scheme-light">
@@ -708,14 +729,22 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 					</div>
 				)}
 
+				{(createStartTime && createStartTime[0] !== null) && (
+					<FastBlockCreate
+						startTime={createStartTime[0]!.toPlainTime()}
+						onSubmit={onFastCreateSave}
+						onDismiss={onDialogDismiss}
+						groups={Array.from(programmeGroups)}
+					/>
+				)}
 
-				{creatingPlannable && (
+				{(createStartTime && createStartTime[0] === null) && (
 					<Dialog
 						onDismiss={onDialogDismiss}
 						onSubmit={onDialogSave}
-						submitDisabled={!isTrayItemComplete(creatingPlannable)}
+						submitDisabled={!isTrayItemComplete(creatingPlannable!)}
 					>
-						<Entity accessor={creatingPlannable}>
+						<Entity accessor={creatingPlannable!}>
 							<TrayItemForm />
 						</Entity>
 					</Dialog>
@@ -777,6 +806,10 @@ export const ComposeSchedule = Component<{ editable: boolean }>(
 					</HasOne>
 				</HasMany>
 			</HasMany>
+			<EntityListSubTree entities="ProgrammeGroup[schedule.id=$scheduleId]" alias="programmeGroup">
+				<Field field="name" />
+				<Field field="color" />
+			</EntityListSubTree>
 		</>
 	),
 )
