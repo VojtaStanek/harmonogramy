@@ -172,7 +172,9 @@ const SegmentBox = memo<SegmentBoxProps>(
 						</div>
 						<div className="scheduleTable__plannableOwners">{trayItem.getField('programmeGroup.name').value}</div>
 						{ownerNames && <div className="scheduleTable__plannableOwners">{ownerNames}</div>}
-						<div className="scheduleTable__plannableOwners">{duration.total({unit: 'minute'})} min</div>
+						<div className="scheduleTable__plannableOwners">
+							{startTime.toLocaleString('cs-CZ', {hour: 'numeric', minute: '2-digit'})} - {endTime.toLocaleString('cs-CZ', {hour: 'numeric', minute: '2-digit'})} ({duration.total({unit: 'minute'})} min)
+						</div>
 					</div>
 				)}
 			</div>
