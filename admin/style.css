@@ -398,7 +398,14 @@
 }
 
 .fastInput__title {
-	margin: 0 0 1em;
+	margin: 0 0 .2em;
 	font-size: 1.5em;
 	text-align: center;
+}
+
+.fastInput__closeHint {
+	text-align: center;
+	font-size: .6em;
+	margin: 0 0 1em;
+	color: #999;
 }

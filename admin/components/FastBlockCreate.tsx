@@ -165,6 +165,7 @@ export const FastBlockCreate: React.FC<FastBlockCreateProps> = ({ startTime, onS
 			<h3 className="fastInput__title">
 				Nový program v {startTime.toString({smallestUnit: "minute"})}
 			</h3>
+			<p className="fastInput__closeHint">stiskni esc pro zrušení</p>
 			{completedValues}
 			{inner}
 		</FastInputFullScreenWrapper>
